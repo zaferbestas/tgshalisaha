@@ -81,7 +81,6 @@
       font-weight:700; letter-spacing:.2px;
     }
     .name small{ color:var(--muted); font-weight:600; font-size:12px }
-    .captain{ font-size:12px; padding:2px 8px; border-radius:8px; background:rgba(39,224,165,.12); color:#9cf5d8; border:1px solid rgba(39,224,165,.35); }
     .pick{
       margin:0 14px 14px; width:calc(100% - 28px);
       background:linear-gradient(180deg, var(--accent), #17c890);
@@ -162,7 +161,7 @@
 
     // 12 karakter
     const PLAYERS = [
-      {id:"tsubasa", name:"Tsubasa Ozora", kit:"10", img:"images/tsubasa.jpg", captain:true},
+      {id:"tsubasa", name:"Tsubasa Ozora", kit:"10", img:"images/tsubasa.jpg"},
       {id:"hyuga", name:"Kojiro Hyuga", kit:"9", img:"images/hyuga.jpg"},
       {id:"misaki", name:"Taro Misaki", kit:"11", img:"images/misaki.jpg"},
       {id:"wakabayashi", name:"Genzo Wakabayashi", kit:"1", img:"images/wakabayashi.jpg"},
@@ -190,7 +189,6 @@
         <div class="name">
           <span>${p.name}</span>
           <div>
-            ${p.captain ? '<span class="captain">KAPTAN</span>' : ''}
             <small id="by-${p.id}"></small>
           </div>
         </div>
