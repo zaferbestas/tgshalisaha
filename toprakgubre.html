@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Toprak Gübre Su Halısaha – Tsubasa Karakterini Seç</title>
+  <meta name="theme-color" content="#0b1530">
+  <style>
+    :root{
+      --bg1:#0b1530;      /* gece laciverti */
+      --bg2:#0e223f;      /* koyu mavi */
+      --panel:#111c36;    /* kart arka planı */
+      --panel-2:#0f1a31;
+      --accent:#27e0a5;   /* neon yeşil (buton) */
+      --accent-2:#60a5fa; /* mavi vurgu */
+      --text:#e9f2ff;     /* açık metin */
+      --muted:#a7bbd6;    /* ikincil metin */
+      --warn:#ff5a5f;     /* kırmızı uyarı */
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 500px at 50% -10%, rgba(28,64,112,.55), rgba(28,64,112,0) 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height:100vh;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    }
+    header{
+      position:sticky; top:0; z-index:10;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 16px;
+      background:linear-gradient(180deg, rgba(6,14,33,.9), rgba(6,14,33,.75));
+      border-bottom:1px solid rgba(96,165,250,.18);
+      backdrop-filter: blur(6px);
+    }
+    .brand{display:flex; gap:12px; align-items:center}
+    .logo{
+      width:42px; height:42px; border-radius:50%;
+      display:grid; place-items:center;
+      background:radial-gradient(circle at 35% 30%, #ffffff, #cde7ff);
+      color:#0b1530; font-size:22px; box-shadow:0 10px 24px rgba(0,0,0,.35);
+      transform:rotate(-8deg);
+      animation:ball 3.1s ease-in-out infinite;
+    }
+    @keyframes ball{ 0%,100%{transform:translateY(0) rotate(-8deg)} 50%{transform:translateY(-4px) rotate(8deg)} }
+    h1{margin:0; font-size:clamp(18px,2.6vw,24px);}
+    .sub{color:var(--muted); font-size:13px}
+    .pill{
+      display:inline-flex; gap:8px; align-items:center;
+      border:1px solid rgba(96,165,250,.25);
+      background:linear-gradient(180deg, var(--panel), var(--panel-2));
+      padding:8px 10px; border-radius:999px; font-size:12px; color:#cfe2ff;
+    }
+    main{max-width:1100px; margin:16px auto 80px; padding:0 16px;}
+    .hero{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; margin:10px 0 16px;
+    }
+    .hero .pill{white-space:nowrap}
+    .grid{
+      display:grid; gap:16px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    .card{
+      position:relative; overflow:hidden;
+      border-radius:14px;
+      background:linear-gradient(160deg, #0f1d3a 0%, #0b1530 100%);
+      border:1px solid rgba(96,165,250,.15);
+      box-shadow: 0 16px 32px rgba(0,0,0,.35);
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .card:hover{ transform:translateY(-3px); box-shadow: 0 24px 40px rgba(0,0,0,.45); }
+    .thumb{ height:170px; background:#102542; display:grid; place-items:center; overflow:hidden;}
+    .thumb img{ width:100%; height:100%; object-fit:cover; filter:saturate(1.05) contrast(1.05); transition: transform .35s ease; }
+    .card:hover .thumb img{ transform:scale(1.06); }
+    .name{
+      padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:8px;
+      font-weight:700; letter-spacing:.2px;
+    }
+    .name small{ color:var(--muted); font-weight:600; font-size:12px }
+    .captain{ font-size:12px; padding:2px 8px; border-radius:8px; background:rgba(39,224,165,.12); color:#9cf5d8; border:1px solid rgba(39,224,165,.35); }
+    .pick{
+      margin:0 14px 14px; width:calc(100% - 28px);
+      background:linear-gradient(180deg, var(--accent), #17c890);
+      color:#031a15; border:none; border-radius:12px; padding:10px 12px;
+      font-weight:800; cursor:pointer; font-size:15px;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      box-shadow:0 14px 28px rgba(23,200,144,.35);
+      transition: transform .05s ease, filter .12s ease;
+    }
+    .pick:active{ transform:translateY(1px) }
+    .pick:disabled{ opacity:.6; cursor:not-allowed; filter:grayscale(.15) }
+    .badge{
+      position:absolute; top:10px; left:10px;
+      background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.18);
+      color:#fff; padding:6px 8px; border-radius:8px; font-size:12px; display:flex; gap:6px; align-items:center; backdrop-filter: blur(6px);
+    }
+    .taken{
+      position:absolute; inset:0; display:none;
+      background:linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.75));
+      place-items:center; color:#fff; font-weight:900; letter-spacing:.3px; font-size:16px;
+    }
+    footer{
+      position:fixed; left:0; right:0; bottom:0;
+      display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:center;
+      padding:10px 12px; background:rgba(8,16,36,.9); border-top:1px solid rgba(96,165,250,.18); backdrop-filter: blur(6px);
+      color:var(--muted); font-size:12px;
+    }
+    .toast{
+      position:fixed; right:14px; bottom:18px; background:#0d2a1f; color:#b9ffe7;
+      border:1px solid rgba(39,224,165,.35); border-radius:12px; padding:10px 12px; font-size:14px; box-shadow:0 12px 24px rgba(0,0,0,.35);
+      display:none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">⚽</div>
+      <div>
+        <h1>Toprak Gübre Su Halısaha</h1>
+        <div class="sub">Tsubasa karakterini seç – seçilen karakter kilitlenir ve başkası seçemez.</div>
+      </div>
+    </div>
+    <div class="pill">📡 Gerçek zamanlı · 🔒 Tek seçim</div>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div class="pill">ℹ️ Bir oyuncu seçtiğinde kart <b>SEÇİLDİ</b> olur, adın kartta görünür.</div>
+      <div class="pill">🏠 Telefonda “Ana ekrana ekle” ile uygulama gibi kullan</div>
+    </div>
+    <section class="grid" id="grid"></section>
+  </main>
+
+  <footer>
+    <span>⚽ <b>Toprak Gübre Su Halısaha</b> • Tsubasa Karakterini Seç</span>
+  </footer>
+
+  <div id="toast" class="toast">Seçiminiz kaydedildi! 🎉</div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, runTransaction, collection } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    // Kullanıcı config (gerçek)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCWzY5xWn1WYPCfeaQb4xqmJIy5oJnaiHk",
+      authDomain: "tgshalisaha-1e266.firebaseapp.com",
+      projectId: "tgshalisaha-1e266",
+      storageBucket: "tgshalisaha-1e266.appspot.com",
+      messagingSenderId: "829282473937",
+      appId: "1:829282473937:web:bdf37a003cad53b763f2f0",
+      measurementId: "G-4898506T9Z"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // 12 karakter
+    const PLAYERS = [
+      {id:"tsubasa", name:"Tsubasa Ozora", kit:"10", img:"images/tsubasa.jpg", captain:true},
+      {id:"hyuga", name:"Kojiro Hyuga", kit:"9", img:"images/hyuga.jpg"},
+      {id:"misaki", name:"Taro Misaki", kit:"11", img:"images/misaki.jpg"},
+      {id:"wakabayashi", name:"Genzo Wakabayashi", kit:"1", img:"images/wakabayashi.jpg"},
+      {id:"wakashimazu", name:"Ken Wakashimazu", kit:"1", img:"images/wakashimazu.jpg"},
+      {id:"matsuyama", name:"Hikaru Matsuyama", kit:"7", img:"images/matsuyama.jpg"},
+      {id:"soda", name:"Makoto Soda", kit:"6", img:"images/soda.jpg"},
+      {id:"tachibana", name:"Kazuo Tachibana", kit:"8", img:"images/tachibana.jpg"},
+      {id:"takasugi", name:"Shingo Takasugi", kit:"5", img:"images/takasugi.jpg"},
+      {id:"ishizaki", name:"Ryo Ishizaki", kit:"4", img:"images/ishizaki.jpg"},
+      {id:"jun", name:"Jun Misugi", kit:"14", img:"images/jun.jpg"},
+      {id:"nitta", name:"Shun Nitta", kit:"13", img:"images/nitta.jpg"}
+    ];
+
+    const grid = document.getElementById("grid");
+    const toast = document.getElementById("toast");
+
+    function cardTpl(p){
+      return `
+      <article class="card" id="card-${p.id}">
+        <div class="thumb">
+          <img src="${p.img}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/400x260?text=${encodeURIComponent(p.name)}'"/>
+          <div class="badge">⚽ Forma <b>#${p.kit}</b></div>
+          <div class="taken" id="taken-${p.id}">SEÇİLDİ ✅</div>
+        </div>
+        <div class="name">
+          <span>${p.name}</span>
+          <div>
+            ${p.captain ? '<span class="captain">KAPTAN</span>' : ''}
+            <small id="by-${p.id}"></small>
+          </div>
+        </div>
+        <button class="pick" id="btn-${p.id}">Seç <span>⚡</span></button>
+      </article>`;
+    }
+    grid.innerHTML = PLAYERS.map(cardTpl).join("");
+
+    // Canlı dinleme
+    const colRef = collection(db, "tsubasa_picks");
+    onSnapshot(colRef, (snap) => {
+      snap.docChanges().forEach(ch => {
+        const id = ch.doc.id; const data = ch.doc.data();
+        applyState(id, data);
+      });
+    });
+
+    // İlk kurulum (dokümanları oluştur)
+    async function ensureDocs(){
+      for(const p of PLAYERS){
+        const ref = doc(db, "tsubasa_picks", p.id);
+        const d = await getDoc(ref);
+        if(!d.exists()) await setDoc(ref, { picked:false });
+        else applyState(p.id, d.data());
+      }
+    }
+    ensureDocs();
+
+    function applyState(id, data){
+      const btn = document.getElementById(`btn-${id}`);
+      const taken = document.getElementById(`taken-${id}`);
+      const by = document.getElementById(`by-${id}`);
+      if(!btn || !taken || !by) return;
+      if(data?.picked){
+        btn.disabled = true;
+        taken.style.display = "grid";
+        by.textContent = data.pickedBy ? `(${data.pickedBy})` : "";
+      }else{
+        btn.disabled = false;
+        taken.style.display = "none";
+        by.textContent = "";
+      }
+    }
+
+    async function pick(id){
+      let name = localStorage.getItem("playerName") || "";
+      if(!name){
+        name = prompt("İsminizi girin (kartta görünecek):") || "";
+        name = name.trim().slice(0, 28);
+        if(!name) return;
+        localStorage.setItem("playerName", name);
+      }
+      const ref = doc(db, "tsubasa_picks", id);
+      try{
+        await runTransaction(db, async (tx)=>{
+          const snap = await tx.get(ref);
+          if(!snap.exists()){ tx.set(ref,{picked:false}); throw "Hazırlanıyor, tekrar deneyin."; }
+          if(snap.data().picked) throw "Bu karakter zaten seçildi.";
+          tx.update(ref, { picked:true, pickedBy:name, ts:Date.now() });
+        });
+        showToast("Seçiminiz kaydedildi! 🎉");
+      }catch(e){
+        alert(e.message || e || "Bir hata oluştu.");
+      }
+    }
+
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.style.display = "block";
+      setTimeout(()=> toast.style.display="none", 1800);
+    }
+
+    // Butonlar
+    PLAYERS.forEach(p => {
+      document.getElementById(`btn-${p.id}`).addEventListener("click", ()=>pick(p.id));
+    });
+  </script>
+</body>
+</html>
