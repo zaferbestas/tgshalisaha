@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TGS Halısaha – Takım ve İstatistikler </title>
+  <title>TGS Halısaha – Takım ve İstatistikler</title>
   <meta name="theme-color" content="#0b1530">
   <style>
     :root{ --bg1:#0b1530; --bg2:#0e223f; --panel:#111c36; --panel-2:#0f1a31;
@@ -29,12 +29,16 @@
     button, select, input[type="number"]{
       padding:8px 10px;border-radius:10px;border:1px solid #274b6a;background:#0e2235;color:#cfe6ff;font-weight:600;cursor:pointer}
     button.cta{background:var(--accent);color:#031a15;border:none;box-shadow:0 10px 22px rgba(39,224,165,.35)}
-    .list{display:grid;gap:10px}
-    .row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);
-      border-radius:10px;padding:8px 10px;background:#0e203a}
-    .row img{width:52px;height:40px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
     .small{font-size:12px;color:var(--muted)}
-    .ctrls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end}
+    .split3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    @media (max-width:900px){.split3{grid-template-columns:1fr}}
+    .list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+    .dropzone{min-height:140px;border:1px dashed #2b4c7a;border-radius:12px;padding:8px;display:grid;gap:8px;background:#0e203a}
+    .item{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:8px;border:1px solid var(--line);border-radius:10px;background:#0f2240}
+    .item.dragging{opacity:.6}
+    .thumb{width:52px;height:40px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+    .rowtop{display:flex;align-items:center;gap:8px;justify-content:space-between}
+    .rowbot{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;align-items:center}
     .num{width:64px}
     .fieldwrap{display:grid;gap:14px}
     .field{position:relative;aspect-ratio:2/3;border-radius:18px;background:linear-gradient(180deg,#0e2b17,#0a1c0f);
@@ -48,22 +52,20 @@
     .badge{font-size:10px;padding:2px 6px;border-radius:999px;background:#102f23;color:#b9ffe7;border:1px solid rgba(39,224,165,.35)}
     .avatar{width:60px;height:46px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,.2)}
     .label{font-size:11px}
-    .split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    @media (max-width:700px){.split{grid-template-columns:1fr}}
-    .muted{color:#a7bbd6}
-    .spacer{flex:1}
+    .split2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media (max-width:700px){.split2{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
   <header>
     <h1>Toprak Gübre Su Halısaha – Takım & Maç Yönetimi</h1>
-    <div class="pill">📡 Seçimler canlı • ✍️ Roller & İstatistikler düzenlenebilir</div>
+    <div class="pill">🖐️ Sürükle-Bırak ile Manuel Takım • 📡 Seçimler canlı</div>
   </header>
 
   <main class="grid">
-    <!-- LEFT: roster & controls -->
+    <!-- LEFT: manual team building -->
     <section class="card">
-      <h2>Kadro / Seçimler</h2>
+      <h2>Kadro / Takım Kur (Manuel)</h2>
       <div class="content">
         <div class="actions">
           <label class="small">Takım boyutu (her takım):</label>
@@ -72,21 +74,31 @@
             <option value="6" selected>6</option>
             <option value="7">7</option>
           </select>
-          <button id="autoSplit" title="Oyuncuları sırayla A/B'ye dağıt">Oto-böl A/B</button>
-          <div class="spacer"></div>
+          <button id="autoSplit" title="Sırayla A/B">Oto-böl A/B</button>
+          <button class="cta" id="buildBtn">Sahaya Yerleştir</button>
+          <div style="flex:1"></div>
           <button id="newMatch">Yeni Maç</button>
           <button class="cta" id="saveStats">Kaydet</button>
           <button id="exportCsv">CSV İndir</button>
         </div>
-        <div class="small muted" id="matchMeta">Match: (oluşturuluyor…)</div>
-        <div class="actions">
-          <span class="small">Toplu rol:</span>
-          <button data-setall="GK">GK</button>
-          <button data-setall="DEF">DEF</button>
-          <button data-setall="MID">MID</button>
-          <button data-setall="FWD">FWD</button>
+
+        <div class="small" id="matchMeta">Match: (oluşturuluyor…)</div>
+        <div class="small" id="status"></div>
+
+        <div class="split3" style="margin-top:10px">
+          <div>
+            <div class="list-header"><b>Bench</b><span class="small" id="countBench"></span></div>
+            <div class="dropzone" id="zone-bench" data-team="-"></div>
+          </div>
+          <div>
+            <div class="list-header"><b>Takım A</b><span class="small" id="countA"></span></div>
+            <div class="dropzone" id="zone-A" data-team="A"></div>
+          </div>
+          <div>
+            <div class="list-header"><b>Takım B</b><span class="small" id="countB"></span></div>
+            <div class="dropzone" id="zone-B" data-team="B"></div>
+          </div>
         </div>
-        <div id="selectedList" class="list"></div>
       </div>
     </section>
 
@@ -94,27 +106,24 @@
     <section class="card">
       <h2>Saha Yerleşimi</h2>
       <div class="content fieldwrap">
-        <div class="split">
+        <div class="split2">
           <div>
-            <div class="field-title"><b>Takım A</b><span class="small muted" id="countA"></span></div>
+            <div class="field-title"><b>Takım A</b><span class="small" id="hintA"></span></div>
             <div class="field" id="fieldA"><div class="circle"></div></div>
           </div>
           <div>
-            <div class="field-title"><b>Takım B</b><span class="small muted" id="countB"></span></div>
+            <div class="field-title"><b>Takım B</b><span class="small" id="hintB"></span></div>
             <div class="field" id="fieldB"><div class="circle"></div></div>
           </div>
         </div>
-        <div class="actions">
-          <button class="cta" id="buildBtn">Sahaya Yerleştir</button>
-          <span class="small muted">Rol & takım seçimlerini soldan yapın. Starter işaretleyin, gol/asist girin. “Kaydet” tümünü Firestore’a yazar.</span>
-        </div>
+        <p class="small">🎯 Oyuncuyu kartından **sürükleyip** listeler arasında taşı. Karttaki **Rol / Starter / Gol / Asist** alanları düzenlenebilir. “Kaydet” hepsini Firestore’a yazar.</p>
       </div>
     </section>
   </main>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, doc, setDoc, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
     // Firebase
     const firebaseConfig = {
@@ -147,156 +156,177 @@
       {id:"taki",   name:"Hajime Taki",     img:"images/taki.jpg"}
     ];
 
-    // UI refs
-    const selList = document.getElementById("selectedList");
-    const statusSpan = document.getElementById("status");
+    // Refs
     const teamSizeSel = document.getElementById("teamSize");
-    const buildBtn = document.getElementById("buildBtn");
     const autoSplitBtn = document.getElementById("autoSplit");
+    const buildBtn = document.getElementById("buildBtn");
     const newMatchBtn = document.getElementById("newMatch");
     const saveStatsBtn = document.getElementById("saveStats");
     const exportCsvBtn = document.getElementById("exportCsv");
-    const fieldA = document.getElementById("fieldA");
-    const fieldB = document.getElementById("fieldB");
+    const zoneBench = document.getElementById("zone-bench");
+    const zoneA = document.getElementById("zone-A");
+    const zoneB = document.getElementById("zone-B");
+    const countBench = document.getElementById("countBench");
     const countA = document.getElementById("countA");
     const countB = document.getElementById("countB");
+    const fieldA = document.getElementById("fieldA");
+    const fieldB = document.getElementById("fieldB");
+    const hintA = document.getElementById("hintA");
+    const hintB = document.getElementById("hintB");
     const matchMeta = document.getElementById("matchMeta");
+    const statusSpan = document.getElementById("status");
 
-    // Local role/team store for UI (shared across users only after Save -> Firestore)
-    const savedRoles = JSON.parse(localStorage.getItem("tg_roles") || "{}");
-    const savedTeams = JSON.parse(localStorage.getItem("tg_teams") || "{}");
-    const savedStats = JSON.parse(localStorage.getItem("tg_stats") || "{}"); // {playerId:{g,a,starter}}
+    // Local stores
+    const savedTeams = JSON.parse(localStorage.getItem("tg_teams") || "{}"); // {id: "A"|"B"|"-"}
+    const savedRoles = JSON.parse(localStorage.getItem("tg_roles") || "{}"); // {id: "GK"/"DEF"/"MID"/"FWD"}
+    const savedStats = JSON.parse(localStorage.getItem("tg_stats") || "{}"); // {id:{g,a,starter}}
 
-    function getRoleFor(id){ return savedRoles[id] || "MID"; }
-    function setRoleFor(id, role){ savedRoles[id]=role; localStorage.setItem("tg_roles", JSON.stringify(savedRoles)); }
-    function getTeamFor(id){ return savedTeams[id] || "A"; }
     function setTeamFor(id, t){ savedTeams[id]=t; localStorage.setItem("tg_teams", JSON.stringify(savedTeams)); }
-    function getStatsFor(id){ return savedStats[id] || {g:0,a:0,starter:false}; }
+    function teamOf(id){ return savedTeams[id] ?? "-"; }
+    function setRoleFor(id, r){ savedRoles[id]=r; localStorage.setItem("tg_roles", JSON.stringify(savedRoles)); }
+    function roleOf(id){ return savedRoles[id] ?? "MID"; }
+    function statsOf(id){ return savedStats[id] ?? {g:0,a:0,starter:false}; }
     function setStatsFor(id, s){ savedStats[id]=s; localStorage.setItem("tg_stats", JSON.stringify(savedStats)); }
 
-    // Field templates per team
+    // Saha şablonları
     const TEMPLATES = {
       5: [ {role:"GK",x:50,y:90},{role:"DEF",x:30,y:65},{role:"DEF",x:70,y:65},{role:"MID",x:40,y:40},{role:"FWD",x:60,y:25} ],
       6: [ {role:"GK",x:50,y:90},{role:"DEF",x:25,y:70},{role:"DEF",x:75,y:70},{role:"MID",x:35,y:48},{role:"MID",x:65,y:48},{role:"FWD",x:50,y:28} ],
       7: [ {role:"GK",x:50,y:90},{role:"DEF",x:20,y:70},{role:"DEF",x:50,y:70},{role:"DEF",x:80,y:70},{role:"MID",x:35,y:48},{role:"MID",x:65,y:48},{role:"FWD",x:50,y:28} ]
     };
 
-    let selected = []; // [{id,name,img,pickedBy,ts}]
-
-    // current match id (shared for stats)
+    // Match id
     let matchId = localStorage.getItem("tg_matchId") || "";
     function ensureMatchId(){
-      if(!matchId){
-        matchId = "m_" + Date.now();
-        localStorage.setItem("tg_matchId", matchId);
-      }
+      if(!matchId){ matchId = "m_" + Date.now(); localStorage.setItem("tg_matchId", matchId); }
       matchMeta.textContent = `Match ID: ${matchId}`;
     }
     ensureMatchId();
 
-    // Live picks feed
+    let selected = []; // [{id,name,img,pickedBy,ts}]
+
+    // Picks feed
+    import { getDocs } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
     onSnapshot(collection(db, "tsubasa_picks"), (snap) => {
       const map = {};
       snap.forEach(d => { map[d.id] = d.data(); });
       selected = PLAYERS.filter(p => map[p.id]?.picked)
         .map(p => ({...p, pickedBy: map[p.id].pickedBy || "", ts: map[p.id].ts || 0}))
         .sort((a,b)=>(a.ts||0)-(b.ts||0));
-      renderList();
-      const info = document.getElementById("status");
-      if(info) info.textContent = selected.length ? `Seçili oyuncu: ${selected.length}` : "Henüz seçim yok";
+      statusSpan.textContent = selected.length ? `Seçili oyuncu: ${selected.length}` : "Henüz seçim yok";
+      renderLists();
     });
 
-    // Render roster with role/team/stats controls
-    function rowHtml(p){
-      const role = getRoleFor(p.id);
-      const team = getTeamFor(p.id);
-      const st = getStatsFor(p.id);
+    // ----- Drag & Drop -----
+    let dragId = null;
+    [zoneBench, zoneA, zoneB].forEach(zone=>{
+      zone.addEventListener("dragover", e=>{ e.preventDefault(); zone.style.outline="2px dashed #4fa3ff"; });
+      zone.addEventListener("dragleave", ()=> zone.style.outline="");
+      zone.addEventListener("drop", e=>{
+        e.preventDefault(); zone.style.outline="";
+        if(dragId){
+          const targetTeam = zone.dataset.team;
+          setTeamFor(dragId, targetTeam);
+          renderLists();
+          dragId = null;
+        }
+      });
+    });
+
+    function itemHtml(p){
+      const team = teamOf(p.id);
+      const st = statsOf(p.id);
+      const role = roleOf(p.id);
       return `
-        <div class="row" id="row-${p.id}">
-          <img src="${p.img}" alt="${p.name}"
-               onerror="this.src='https://via.placeholder.com/120x90?text=${encodeURIComponent(p.name)}'">
+        <div class="item" draggable="true" data-id="${p.id}">
+          <img class="thumb" src="${p.img}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/120x90?text=${encodeURIComponent(p.name)}'">
           <div>
-            <div><b>${p.name}</b></div>
-            <div class="small">Seçen: ${p.pickedBy || "-"}</div>
-          </div>
-          <div class="ctrls">
-            <label class="small">Rol</label>
-            <select id="role-${p.id}">
-              <option value="GK"  ${role==="GK"?"selected":""}>GK</option>
-              <option value="DEF" ${role==="DEF"?"selected":""}>DEF</option>
-              <option value="MID" ${role==="MID"?"selected":""}>MID</option>
-              <option value="FWD" ${role==="FWD"?"selected":""}>FWD</option>
-            </select>
+            <div class="rowtop">
+              <div><b>${p.name}</b> <span class="small">(${p.pickedBy || "-"})</span></div>
+              <div class="small">Takım: <b>${team==="-"?"Bench":team}</b></div>
+            </div>
+            <div class="rowbot">
+              <label class="small">Rol</label>
+              <select data-ctl="role">
+                <option value="GK"  ${role==="GK"?"selected":""}>GK</option>
+                <option value="DEF" ${role==="DEF"?"selected":""}>DEF</option>
+                <option value="MID" ${role==="MID"?"selected":""}>MID</option>
+                <option value="FWD" ${role==="FWD"?"selected":""}>FWD</option>
+              </select>
 
-            <label class="small">Takım</label>
-            <select id="team-${p.id}">
-              <option value="A" ${team==="A"?"selected":""}>A</option>
-              <option value="B" ${team==="B"?"selected":""}>B</option>
-              <option value="-" ${team==="-"?"selected":""}>Bench</option>
-            </select>
+              <label class="small">Starter</label>
+              <input data-ctl="starter" type="checkbox" ${st.starter?"checked":""} />
 
-            <label class="small">Starter</label>
-            <input type="checkbox" id="st-${p.id}" ${st.starter?"checked":""} />
+              <label class="small">Gol</label>
+              <input data-ctl="g" class="num" type="number" min="0" max="30" value="${st.g||0}"/>
 
-            <label class="small">Gol</label>
-            <input class="num" type="number" min="0" max="20" id="g-${p.id}" value="${st.g||0}"/>
-
-            <label class="small">Asist</label>
-            <input class="num" type="number" min="0" max="20" id="a-${p.id}" value="${st.a||0}"/>
+              <label class="small">Asist</label>
+              <input data-ctl="a" class="num" type="number" min="0" max="30" value="${st.a||0}"/>
+            </div>
           </div>
         </div>
       `;
     }
 
-    function renderList(){
-      selList.innerHTML = selected.map(rowHtml).join("");
-      // attach listeners
-      selected.forEach(p=>{
-        const r = document.getElementById(`role-${p.id}`);
-        const t = document.getElementById(`team-${p.id}`);
-        const sg = document.getElementById(`g-${p.id}`);
-        const sa = document.getElementById(`a-${p.id}`);
-        const st = document.getElementById(`st-${p.id}`);
-        r.addEventListener("change", e=> setRoleFor(p.id, e.target.value));
-        t.addEventListener("change", e=> setTeamFor(p.id, e.target.value));
-        sg.addEventListener("change", e=> setStatsFor(p.id, {...getStatsFor(p.id), g:+e.target.value||0}));
-        sa.addEventListener("change", e=> setStatsFor(p.id, {...getStatsFor(p.id), a:+e.target.value||0}));
-        st.addEventListener("change", e=> setStatsFor(p.id, {...getStatsFor(p.id), starter: e.target.checked}));
+    function attachItemEvents(container){
+      container.querySelectorAll(".item").forEach(el=>{
+        const id = el.dataset.id;
+        // drag
+        el.addEventListener("dragstart", ()=>{ dragId = id; el.classList.add("dragging"); });
+        el.addEventListener("dragend", ()=>{ el.classList.remove("dragging"); });
+
+        // controls
+        const roleSel = el.querySelector('[data-ctl="role"]');
+        const chk = el.querySelector('[data-ctl="starter"]');
+        const g = el.querySelector('[data-ctl="g"]');
+        const a = el.querySelector('[data-ctl="a"]');
+
+        roleSel.addEventListener("change", e=> setRoleFor(id, e.target.value));
+        chk.addEventListener("change", e=> setStatsFor(id, {...statsOf(id), starter: e.target.checked}));
+        g.addEventListener("change", e=> setStatsFor(id, {...statsOf(id), g:+e.target.value||0}));
+        a.addEventListener("change", e=> setStatsFor(id, {...statsOf(id), a:+e.target.value||0}));
       });
     }
 
-    // Bulk set roles
-    document.querySelectorAll("[data-setall]").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const role = btn.getAttribute("data-setall");
-        selected.forEach(p=>{
-          setRoleFor(p.id, role);
-          const el = document.getElementById(`role-${p.id}`);
-          if(el) el.value = role;
-        });
-      });
-    });
+    function renderLists(){
+      // ensure team defaults are '-'
+      selected.forEach(p=>{ if(savedTeams[p.id]===undefined) setTeamFor(p.id, "-"); });
+      const bench = selected.filter(p=>teamOf(p.id)==="-");
+      const teamA = selected.filter(p=>teamOf(p.id)==="A");
+      const teamB = selected.filter(p=>teamOf(p.id)==="B");
 
-    // Auto split A/B alternating
+      zoneBench.innerHTML = bench.map(itemHtml).join("");
+      zoneA.innerHTML = teamA.map(itemHtml).join("");
+      zoneB.innerHTML = teamB.map(itemHtml).join("");
+
+      attachItemEvents(zoneBench);
+      attachItemEvents(zoneA);
+      attachItemEvents(zoneB);
+
+      countBench.textContent = `${bench.length} oyuncu`;
+      countA.textContent = `${teamA.length} oyuncu`;
+      countB.textContent = `${teamB.length} oyuncu`;
+    }
+
+    // Auto-split (optional)
     autoSplitBtn.addEventListener("click", ()=>{
       let toggle = true;
       selected.forEach(p=>{
-        const team = toggle ? "A" : "B";
-        setTeamFor(p.id, team);
-        const el = document.getElementById(`team-${p.id}`);
-        if(el) el.value = team;
+        setTeamFor(p.id, toggle ? "A" : "B");
         toggle = !toggle;
       });
+      renderLists();
     });
 
-    // Layout logic
+    // Saha çizimi
     function renderField(fieldEl, teamPlayers, teamSize){
       fieldEl.querySelectorAll(".pos").forEach(el=>el.remove());
       const tmpl = TEMPLATES[teamSize];
-      const pool = teamPlayers.slice(0, teamSize); // cap by size
+      const pool = teamPlayers.slice(0, teamSize); // cap
       tmpl.forEach(slot=>{
         if(!pool.length) return;
-        let idx = pool.findIndex(p => p.role===slot.role);
+        // role eşleşmesini dene
+        let idx = pool.findIndex(p => roleOf(p.id)===slot.role);
         if(idx < 0) idx = 0;
         const p = pool.splice(idx,1)[0];
         const el=document.createElement("div");
@@ -312,74 +342,60 @@
 
     function build(){
       const size = +teamSizeSel.value;
-      const teamA = selected
-        .filter(p => getTeamFor(p.id)==="A")
-        .map(p => ({...p, role: getRoleFor(p.id)}));
-      const teamB = selected
-        .filter(p => getTeamFor(p.id)==="B")
-        .map(p => ({...p, role: getRoleFor(p.id)}));
-      countA.textContent = `${teamA.length} oyuncu`;
-      countB.textContent = `${teamB.length} oyuncu`;
+      const teamA = selected.filter(p=>teamOf(p.id)==="A");
+      const teamB = selected.filter(p=>teamOf(p.id)==="B");
+      hintA.textContent = `${teamA.length} oyuncu`;
+      hintB.textContent = `${teamB.length} oyuncu`;
       renderField(fieldA, teamA, size);
       renderField(fieldB, teamB, size);
     }
     buildBtn.addEventListener("click", build);
 
-    // Match ops
-    newMatchBtn.addEventListener("click", async ()=>{
+    // Yeni Maç
+    newMatchBtn.addEventListener("click", ()=>{
       matchId = "m_" + Date.now();
       localStorage.setItem("tg_matchId", matchId);
-      // Clear local stats for a clean slate
+      // sadece istatistikleri sıfırla (takım/rol kalsın istersen)
       localStorage.removeItem("tg_stats");
       Object.keys(savedStats).forEach(k=> delete savedStats[k]);
       matchMeta.textContent = `Match ID: ${matchId}`;
       alert("Yeni maç oluşturuldu.");
     });
 
-    // Save to Firestore
+    // Kaydet → Firestore
     saveStatsBtn.addEventListener("click", async ()=>{
-      if(!matchId) ensureMatchId();
       const teamSize = +teamSizeSel.value;
-      // save match meta
-      await setDoc(doc(db, "matches", matchId), {
-        createdAt: Date.now(),
-        teamSize,
-      }, {merge:true});
-      // save each player
-      const promises = selected.map(p=>{
+      await setDoc(doc(db, "matches", matchId), { createdAt: Date.now(), teamSize }, {merge:true});
+      // her oyuncu
+      const writes = selected.map(p=>{
         const data = {
-          name: p.name,
-          img: p.img,
-          role: getRoleFor(p.id),
-          team: getTeamFor(p.id),
-          ...getStatsFor(p.id)
+          name: p.name, img: p.img,
+          team: teamOf(p.id),
+          role: roleOf(p.id),
+          ...statsOf(p.id)
         };
         return setDoc(doc(db, "matches", matchId, "players", p.id), data, {merge:true});
       });
-      await Promise.all(promises);
+      await Promise.all(writes);
       alert("Kaydedildi ✅");
     });
 
-    // Export CSV
+    // CSV
     function toCsv(rows){
       const headers = ["playerId","name","team","role","starter","goals","assists"];
       const lines = [headers.join(",")];
-      rows.forEach(r=>{
-        lines.push([r.id, `"${r.name}"`, r.team, r.role, r.starter?1:0, r.g, r.a].join(","));
-      });
+      rows.forEach(r=> lines.push([r.id, `"${r.name}"`, r.team, r.role, r.starter?1:0, r.g, r.a].join(",")));
       return lines.join("\n");
     }
-    exportCsvBtn.addEventListener("click", async ()=>{
+    exportCsvBtn.addEventListener("click", ()=>{
       const rows = selected.map(p=>{
-        const st = getStatsFor(p.id);
-        return {id:p.id, name:p.name, team:getTeamFor(p.id), role:getRoleFor(p.id), starter:!!st.starter, g:st.g||0, a:st.a||0};
+        const st = statsOf(p.id);
+        return { id:p.id, name:p.name, team:teamOf(p.id), role:roleOf(p.id), starter:!!st.starter, g:st.g||0, a:st.a||0 };
       });
       const blob = new Blob([toCsv(rows)], {type:"text/csv;charset=utf-8"});
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url; a.download = `match_${matchId||"current"}.csv`;
-      document.body.appendChild(a); a.click(); a.remove();
-      URL.revokeObjectURL(url);
+      const a = document.createElement("a"); a.href=url; a.download=`match_${matchId||"current"}.csv`;
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     });
   </script>
 </body>
