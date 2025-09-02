@@ -19,7 +19,8 @@
     .pill{display:inline-flex;gap:8px;align-items:center;border:1px solid rgba(96,165,250,.25);
       background:linear-gradient(180deg,var(--panel),var(--panel-2));padding:8px 10px;border-radius:999px;font-size:12px;color:#cfe2ff;}
     main{max-width:1200px;margin:16px auto 80px;padding:0 16px;}
-    .grid{display:grid;gap:16px;grid-template-columns:1.15fr 1fr}
+    /* ÖNEMLİ: minmax(0, …) ile taşmaları engelle */
+    .grid{display:grid;gap:16px;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
     @media (max-width:1050px){.grid{grid-template-columns:1fr}}
     .card{background:linear-gradient(160deg,#0f1d3a 0%,#0b1530 100%);border:1px solid rgba(96,165,250,.15);
       border-radius:14px;overflow:hidden;box-shadow:0 16px 32px rgba(0,0,0,.35);}
@@ -28,16 +29,31 @@
     .actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:center}
     button, select, input[type="number"]{
       padding:8px 10px;border-radius:10px;border:1px solid #274b6a;background:#0e2235;color:#cfe6ff;font-weight:600;cursor:pointer}
+    button:hover{filter:brightness(1.05)}
+    button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid rgba(39,224,165,.6);outline-offset:2px}
     button.cta{background:var(--accent);color:#031a15;border:none;box-shadow:0 10px 22px rgba(39,224,165,.35)}
     .small{font-size:12px;color:var(--muted)}
-    .split3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    /* ÖNEMLİ: 3 kolonun her biri taşmadan paylaşımlı satırda kalsın */
+    .split3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start}
     @media (max-width:900px){.split3{grid-template-columns:1fr}}
-    .list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-    .dropzone{min-height:140px;border:1px dashed #2b4c7a;border-radius:12px;padding:8px;display:grid;gap:8px;background:#0e203a}
-    .item{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:8px;border:1px solid var(--line);border-radius:10px;background:#0f2240}
+    /* Liste başlıklarını sticky yap, altı kaydırılsın */
+    .list{
+      display:flex;flex-direction:column;gap:8px;min-width:0; /* taşma engel */
+    }
+    .list-header{position:sticky;top:0;z-index:1;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:8px 6px;margin:0;border-radius:10px;
+      background:#0f2240;border:1px solid var(--line)}
+    /* ÖNEMLİ: İç scroll + sabit yükseklik → uzun Bench A/B’yi ezmez */
+    .dropzone{
+      min-height:160px;max-height:420px;overflow:auto;
+      border:1px dashed #2b4c7a;border-radius:12px;padding:8px;display:grid;gap:8px;background:#0e203a
+    }
+    .item{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:8px;border:1px solid var(--line);border-radius:10px;background:#0f2240;min-width:0}
     .item.dragging{opacity:.6}
     .thumb{width:52px;height:40px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
-    .rowtop{display:flex;align-items:center;gap:8px;justify-content:space-between}
+    .rowtop{display:flex;align-items:center;gap:8px;justify-content:space-between;min-width:0}
+    .rowtop .name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
     .rowbot{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;align-items:center}
     .num{width:64px}
     .fieldwrap{display:grid;gap:14px}
@@ -51,9 +67,11 @@
     .pos{position:absolute;translate:-50% -50%;display:grid;place-items:center;gap:4px;text-align:center}
     .badge{font-size:10px;padding:2px 6px;border-radius:999px;background:#102f23;color:#b9ffe7;border:1px solid rgba(39,224,165,.35)}
     .avatar{width:60px;height:46px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,.2)}
-    .label{font-size:11px}
+    .label{font-size:11px;max-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .split2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
     @media (max-width:700px){.split2{grid-template-columns:1fr}}
+    /* Küçük iyileştirmeler */
+    .count-badge{font-size:11px;background:#0e2235;border:1px solid var(--line);padding:2px 8px;border-radius:999px;color:#cfe6ff}
   </style>
 </head>
 <body>
@@ -86,16 +104,16 @@
         <div class="small" id="status"></div>
 
         <div class="split3" style="margin-top:10px">
-          <div>
-            <div class="list-header"><b>Bench</b><span class="small" id="countBench"></span></div>
+          <div class="list">
+            <div class="list-header"><b>Bench</b><span class="count-badge" id="countBench"></span></div>
             <div class="dropzone" id="zone-bench" data-team="-"></div>
           </div>
-          <div>
-            <div class="list-header"><b>Takım A</b><span class="small" id="countA"></span></div>
+          <div class="list">
+            <div class="list-header"><b>Takım A</b><span class="count-badge" id="countA"></span></div>
             <div class="dropzone" id="zone-A" data-team="A"></div>
           </div>
-          <div>
-            <div class="list-header"><b>Takım B</b><span class="small" id="countB"></span></div>
+          <div class="list">
+            <div class="list-header"><b>Takım B</b><span class="count-badge" id="countB"></span></div>
             <div class="dropzone" id="zone-B" data-team="B"></div>
           </div>
         </div>
@@ -116,7 +134,7 @@
             <div class="field" id="fieldB"><div class="circle"></div></div>
           </div>
         </div>
-        <p class="small">🎯 Oyuncuyu kartından **sürükleyip** listeler arasında taşı. Karttaki **Rol / Starter / Gol / Asist** alanları düzenlenebilir. “Kaydet” hepsini Firestore’a yazar.</p>
+        <p class="small">🎯 Oyuncuyu kartından <b>sürükleyip</b> listeler arasında taşı. Karttaki <b>Rol / Starter / Gol / Asist</b> alanları düzenlenebilir. “Kaydet” hepsini Firestore’a yazar.</p>
       </div>
     </section>
   </main>
@@ -242,7 +260,7 @@
           <img class="thumb" src="${p.img}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/120x90?text=${encodeURIComponent(p.name)}'">
           <div>
             <div class="rowtop">
-              <div><b>${p.name}</b> <span class="small">(${p.pickedBy || "-"})</span></div>
+              <div class="name">${p.name} <span class="small">(${p.pickedBy || "-"})</span></div>
               <div class="small">Takım: <b>${team==="-"?"Bench":team}</b></div>
             </div>
             <div class="rowbot">
@@ -353,19 +371,20 @@
 
     // Yeni Maç
     newMatchBtn.addEventListener("click", ()=>{
-      matchId = "m_" + Date.now();
-      localStorage.setItem("tg_matchId", matchId);
+      let matchIdLocal = "m_" + Date.now();
+      localStorage.setItem("tg_matchId", matchIdLocal);
       // sadece istatistikleri sıfırla (takım/rol kalsın istersen)
       localStorage.removeItem("tg_stats");
       Object.keys(savedStats).forEach(k=> delete savedStats[k]);
-      matchMeta.textContent = `Match ID: ${matchId}`;
+      matchMeta.textContent = `Match ID: ${matchIdLocal}`;
       alert("Yeni maç oluşturuldu.");
     });
 
     // Kaydet → Firestore
     saveStatsBtn.addEventListener("click", async ()=>{
       const teamSize = +teamSizeSel.value;
-      await setDoc(doc(db, "matches", matchId), { createdAt: Date.now(), teamSize }, {merge:true});
+      const matchIdLocal = localStorage.getItem("tg_matchId");
+      await setDoc(doc(db, "matches", matchIdLocal), { createdAt: Date.now(), teamSize }, {merge:true});
       // her oyuncu
       const writes = selected.map(p=>{
         const data = {
@@ -374,7 +393,7 @@
           role: roleOf(p.id),
           ...statsOf(p.id)
         };
-        return setDoc(doc(db, "matches", matchId, "players", p.id), data, {merge:true});
+        return setDoc(doc(db, "matches", matchIdLocal, "players", p.id), data, {merge:true});
       });
       await Promise.all(writes);
       alert("Kaydedildi ✅");
@@ -388,13 +407,14 @@
       return lines.join("\n");
     }
     exportCsvBtn.addEventListener("click", ()=>{
+      const matchIdLocal = localStorage.getItem("tg_matchId");
       const rows = selected.map(p=>{
         const st = statsOf(p.id);
         return { id:p.id, name:p.name, team:teamOf(p.id), role:roleOf(p.id), starter:!!st.starter, g:st.g||0, a:st.a||0 };
       });
       const blob = new Blob([toCsv(rows)], {type:"text/csv;charset=utf-8"});
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href=url; a.download=`match_${matchId||"current"}.csv`;
+      const a = document.createElement("a"); a.href=url; a.download=`match_${matchIdLocal||"current"}.csv`;
       document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     });
   </script>
