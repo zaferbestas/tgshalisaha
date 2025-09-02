@@ -8,8 +8,7 @@
   <style>
     :root{
       --bg1:#0b1530; --bg2:#0e223f; --panel:#111c36; --panel-2:#0f1a31;
-      --accent:#27e0a5; --accent-2:#60a5fa; --text:#e9f2ff; --muted:#a7bbd6;
-      --line:#1f3557;
+      --accent:#27e0a5; --accent-2:#60a5fa; --text:#e9f2ff; --muted:#a7bbd6; --line:#1f3557;
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);
@@ -30,6 +29,7 @@
     .row img{width:52px;height:40px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
     .row .name{font-weight:700}
     .row .pickedby{color:var(--muted);font-size:12px}
+    .row .controls{margin-left:auto;display:flex;gap:8px;align-items:center}
     .actions{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
     button, select{padding:10px 12px;border-radius:10px;border:1px solid #274b6a;background:#0e2235;color:#cfe6ff;font-weight:600;cursor:pointer}
     button.cta{background:var(--accent);color:#031a15;border:none;box-shadow:0 10px 22px rgba(39,224,165,.35)}
@@ -48,7 +48,7 @@
 <body>
   <header>
     <h1>Toprak Gübre Su Halısaha – Takım Oluştur</h1>
-    <div class="pill">📡 Seçimler canlı • 🏷️ Firestore</div>
+    <div class="pill">📡 Seçimler canlı • 🏷️ Rol seçilebilir</div>
   </header>
 
   <main class="grid">
@@ -65,6 +65,13 @@
           <button class="cta" id="buildBtn">Takımı Hazırla</button>
           <span id="status" class="hint"></span>
         </div>
+        <div class="actions">
+          <span class="hint">Toplu rol ata:</span>
+          <button data-setall="GK">GK</button>
+          <button data-setall="DEF">DEF</button>
+          <button data-setall="MID">MID</button>
+          <button data-setall="FWD">FWD</button>
+        </div>
         <div id="selectedList" class="list"></div>
       </div>
     </section>
@@ -75,7 +82,7 @@
         <div class="field" id="field">
           <div class="circle"></div>
         </div>
-        <p class="hint" style="margin-top:10px">📝 Pozisyonlar otomatik yerleştirilir. Eksik varsa sırayla doldurulur.</p>
+        <p class="hint" style="margin-top:10px">📝 Soldaki listeden her oyuncu için rolü seç. “Takımı Hazırla” deyince pozisyonlara otomatik yerleştirilir.</p>
       </div>
     </section>
   </main>
@@ -97,6 +104,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // Oyuncular (Kisugi ve Taki dahil)
     const PLAYERS = [
       {id:"tsubasa", name:"Tsubasa Ozora", img:"images/tsubasa.jpg"},
       {id:"hyuga", name:"Kojiro Hyuga", img:"images/hyuga.jpg"},
@@ -109,16 +117,31 @@
       {id:"takasugi", name:"Shingo Takasugi", img:"images/takasugi.jpg"},
       {id:"ishizaki", name:"Ryo Ishizaki", img:"images/ishizaki.jpg"},
       {id:"jun", name:"Jun Misugi", img:"images/jun.jpg"},
-      {id:"nitta", name:"Shun Nitta", img:"images/nitta.jpg"}
+      {id:"nitta", name:"Shun Nitta", img:"images/nitta.jpg"},
+      {id:"kisugi", name:"Seiichiro Kisugi", img:"images/kisugi2.jpg"},
+      {id:"taki",   name:"Hajime Taki",     img:"images/taki.jpg"}
     ];
 
-    const ROLES = {
-      wakabayashi: "GK", wakashimazu: "GK",
-      ishizaki: "DEF", takasugi: "DEF",
-      matsuyama: "MID", soda: "MID", misaki: "MID", jun: "MID",
-      tsubasa: "FWD", hyuga: "FWD", nitta: "FWD", tachibana: "FWD"
+    // Varsayılan roller (ilk yüklemede seçenekleri doldurmak için)
+    const DEFAULT_ROLES = {
+      wakabayashi:"GK", wakashimazu:"GK",
+      ishizaki:"DEF", takasugi:"DEF",
+      matsuyama:"MID", soda:"MID", misaki:"MID", jun:"MID",
+      tsubasa:"FWD", hyuga:"FWD", nitta:"FWD", tachibana:"FWD",
+      kisugi:"FWD", taki:"FWD"
     };
 
+    // Form rollerini localStorage'da tut
+    const savedRoles = JSON.parse(localStorage.getItem("tg_roles") || "{}");
+    function getRoleFor(id){
+      return savedRoles[id] || DEFAULT_ROLES[id] || "MID";
+    }
+    function setRoleFor(id, role){
+      savedRoles[id] = role;
+      localStorage.setItem("tg_roles", JSON.stringify(savedRoles));
+    }
+
+    // Saha şablonları
     const TEMPLATES = {
       5: [ {role:"GK",x:50,y:90}, {role:"DEF",x:30,y:65}, {role:"DEF",x:70,y:65}, {role:"MID",x:40,y:40}, {role:"FWD",x:60,y:25} ],
       6: [ {role:"GK",x:50,y:90}, {role:"DEF",x:25,y:70}, {role:"DEF",x:75,y:70}, {role:"MID",x:35,y:48}, {role:"MID",x:65,y:48}, {role:"FWD",x:50,y:28} ],
@@ -130,43 +153,84 @@
     const teamSizeSel = document.getElementById("teamSize");
     const buildBtn = document.getElementById("buildBtn");
     const field = document.getElementById("field");
-    let selected = [];
 
+    let selected = []; // [{id,name,img,pickedBy,ts}]
+
+    // Firestore'dan canlı okuma
     onSnapshot(collection(db, "tsubasa_picks"), (snap) => {
       const map = {};
       snap.forEach(d => { map[d.id] = d.data(); });
       selected = PLAYERS.filter(p => map[p.id]?.picked)
-        .map(p => ({...p, pickedBy: map[p.id].pickedBy || ""}))
+        .map(p => ({...p, pickedBy: map[p.id].pickedBy || "", ts: map[p.id].ts || 0}))
         .sort((a,b)=>(a.ts||0)-(b.ts||0));
       renderList();
       statusSpan.textContent = selected.length ? `Seçili oyuncu: ${selected.length}` : "Henüz seçim yok";
     });
 
-    function renderList(){
-      selList.innerHTML = selected.map(p => `
+    // Sol listedeki satır + rol seçimi
+    function rowHtml(p){
+      const role = getRoleFor(p.id);
+      return `
         <div class="row">
-          <img src="${p.img}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/120x90?text=${encodeURIComponent(p.name)}'">
-          <div><div class="name">${p.name}</div><div class="pickedby">Seçen: ${p.pickedBy || "-"}</div></div>
-        </div>`).join("");
+          <img src="${p.img}" alt="${p.name}"
+               onerror="this.src='https://via.placeholder.com/120x90?text=${encodeURIComponent(p.name)}'">
+          <div>
+            <div class="name">${p.name}</div>
+            <div class="pickedby">Seçen: ${p.pickedBy || "-"}</div>
+          </div>
+          <div class="controls">
+            <label class="hint">Rol</label>
+            <select id="role-${p.id}">
+              <option value="GK"  ${role==="GK"?"selected":""}>GK</option>
+              <option value="DEF" ${role==="DEF"?"selected":""}>DEF</option>
+              <option value="MID" ${role==="MID"?"selected":""}>MID</option>
+              <option value="FWD" ${role==="FWD"?"selected":""}>FWD</option>
+            </select>
+          </div>
+        </div>
+      `;
     }
 
-    function chooseForRole(role, pool){
-      const i = pool.findIndex(p => (ROLES[p.id]||"")===role);
-      if(i>=0) return pool.splice(i,1)[0];
-      return pool.shift();
+    function renderList(){
+      selList.innerHTML = selected.map(rowHtml).join("");
+      // event listeners to save selections
+      selected.forEach(p=>{
+        const sel = document.getElementById(`role-${p.id}`);
+        sel.addEventListener("change", e=> setRoleFor(p.id, e.target.value));
+      });
     }
 
+    // Toplu rol atama
+    document.querySelectorAll("[data-setall]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const role = btn.getAttribute("data-setall");
+        selected.forEach(p=>{
+          setRoleFor(p.id, role);
+          const el = document.getElementById(`role-${p.id}`);
+          if(el) el.value = role;
+        });
+      });
+    });
+
+    // Şablona göre oyuncu seçim/yerleştirme
     function buildTeam(){
       const size = parseInt(teamSizeSel.value,10);
       const tmpl = TEMPLATES[size];
       if(!selected.length){ alert("Seçili oyuncu yok."); return; }
-      const pool = selected.slice(0,size);
-      const used=[];
+
+      // En fazla 'size' kadar oyuncu al
+      const pool = selected.slice(0, size).map(p => ({...p, role:getRoleFor(p.id)}));
+      const used = [];
+
       tmpl.forEach(slot=>{
         if(!pool.length) return;
-        const p = chooseForRole(slot.role,pool);
-        if(p) used.push({slot,p});
+        // önce slot rolü ile eşleşen biri
+        let idx = pool.findIndex(p=>p.role===slot.role);
+        if(idx<0) idx = 0; // bulunamazsa sıradaki
+        const p = pool.splice(idx,1)[0];
+        used.push({slot,p});
       });
+
       renderField(used);
     }
 
@@ -178,13 +242,15 @@
         el.style.left=slot.x+"%"; el.style.top=slot.y+"%";
         el.innerHTML=`
           <span class="badge">${slot.role}</span>
-          <img class="avatar" src="${p.img}" onerror="this.src='https://via.placeholder.com/160x110?text=${encodeURIComponent(p.name)}'" alt="${p.name}">
+          <img class="avatar" src="${p.img}" 
+               onerror="this.src='https://via.placeholder.com/160x110?text=${encodeURIComponent(p.name)}'" 
+               alt="${p.name}">
           <div class="label">${p.name}</div>`;
         field.appendChild(el);
       });
     }
 
-    buildBtn.addEventListener("click",buildTeam);
+    buildBtn.addEventListener("click", buildTeam);
   </script>
 </body>
 </html>
