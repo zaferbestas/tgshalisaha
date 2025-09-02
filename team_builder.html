@@ -307,17 +307,48 @@
     }
     ensureMatchId();
 
-    let selected = []; // [{id,name,img,pickedBy,ts}]
-
-    /* Listen picks */
-    onSnapshot(collection(db, "tsubasa_picks"), (snap) => {
-      const map = {}; snap.forEach(d => map[d.id] = d.data());
-      selected = PLAYERS.filter(p => map[p.id]?.picked)
-        .map(p => ({...p, pickedBy: map[p.id].pickedBy || "", ts: map[p.id].ts || 0}))
-        .sort((a,b)=>(a.ts||0)-(b.ts||0));
-      statusSpan.textContent = selected.length ? `Seçili oyuncu: ${selected.length}` : "Henüz seçim yok";
+  /* Default: list everyone immediately so the UI isn't empty */
+  let selected = PLAYERS.map(p => ({ ...p, pickedBy: "" }));
+  statusSpan.textContent = "Henüz seçim yok — tüm oyuncular listelendi";
+  renderLists();
+  
+  /* Live picks (with error handler + fallback) */
+  const colRef = collection(db, "tsubasa_picks");
+  
+  onSnapshot(
+    colRef,
+    (snap) => {
+      const map = {};
+      snap.forEach(d => (map[d.id] = d.data()));
+  
+      const picked = PLAYERS
+        .filter(p => map[p.id]?.picked)
+        .map(p => ({
+          ...p,
+          pickedBy: map[p.id].pickedBy || "",
+          ts: map[p.id].ts || 0
+        }))
+        .sort((a, b) => (a.ts || 0) - (b.ts || 0));
+  
+      if (picked.length) {
+        selected = picked;
+        statusSpan.textContent = `Seçili oyuncu: ${selected.length}`;
+      } else {
+        // No picks yet → show everyone
+        selected = PLAYERS.map(p => ({ ...p, pickedBy: "" }));
+        statusSpan.textContent = "Henüz seçim yok — tüm oyuncular listelendi";
+      }
       renderLists();
-    });
+    },
+    (err) => {
+      console.error("Firestore read error:", err);
+      // Fallback so UI isn't empty if rules/network fail
+      selected = PLAYERS.map(p => ({ ...p, pickedBy: "" }));
+      statusSpan.textContent = "Veri okunamadı — tüm oyuncular listelendi";
+      renderLists();
+    }
+  );
+
 
     /* Drag & Drop */
     let dragId = null;
