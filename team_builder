@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Toprak Gübre Su Halısaha – Takım Oluştur</title>
+  <meta name="theme-color" content="#0b1530">
+  <style>
+    :root{
+      --bg1:#0b1530; --bg2:#0e223f; --panel:#111c36; --panel-2:#0f1a31;
+      --accent:#27e0a5; --accent-2:#60a5fa; --text:#e9f2ff; --muted:#a7bbd6;
+      --line:#1f3557;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);
+      background: radial-gradient(1200px 500px at 50% -10%, rgba(28,64,112,.55), rgba(28,64,112,0) 60%), linear-gradient(180deg, var(--bg1), var(--bg2));}
+    header{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;
+      padding:14px 16px;background:linear-gradient(180deg, rgba(6,14,33,.9), rgba(6,14,33,.75));border-bottom:1px solid rgba(96,165,250,.18);backdrop-filter: blur(6px);}
+    h1{margin:0;font-size:clamp(18px,2.6vw,24px)}
+    .pill{display:inline-flex;gap:8px;align-items:center;border:1px solid rgba(96,165,250,.25);
+      background:linear-gradient(180deg,var(--panel),var(--panel-2));padding:8px 10px;border-radius:999px;font-size:12px;color:#cfe2ff;}
+    main{max-width:1100px;margin:16px auto 80px;padding:0 16px;}
+    .grid{display:grid;gap:16px;grid-template-columns:1.2fr 1fr}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+    .card{background:linear-gradient(160deg,#0f1d3a 0%,#0b1530 100%);border:1px solid rgba(96,165,250,.15);border-radius:14px;overflow:hidden;box-shadow:0 16px 32px rgba(0,0,0,.35);}
+    .card h2{margin:0;padding:14px 16px;border-bottom:1px solid var(--line);font-size:16px}
+    .card .content{padding:14px 16px}
+    .list{display:grid;gap:10px}
+    .row{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#0e203a}
+    .row img{width:52px;height:40px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+    .row .name{font-weight:700}
+    .row .pickedby{color:var(--muted);font-size:12px}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+    button, select{padding:10px 12px;border-radius:10px;border:1px solid #274b6a;background:#0e2235;color:#cfe6ff;font-weight:600;cursor:pointer}
+    button.cta{background:var(--accent);color:#031a15;border:none;box-shadow:0 10px 22px rgba(39,224,165,.35)}
+    .field{position:relative;aspect-ratio:2/3;border-radius:18px;background:linear-gradient(180deg,#0e2b17,#0a1c0f);border:1px solid #2f5641;padding:10px}
+    .field::before,.field::after{content:"";position:absolute;left:50%;transform:translateX(-50%);border:2px solid rgba(255,255,255,.25);}
+    .field::before{top:8%;width:70%;height:26%;border-radius:12px}
+    .field::after{bottom:8%;width:70%;height:26%;border-radius:12px}
+    .circle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:26%;height:16%;border-radius:999px;border:2px solid rgba(255,255,255,.25)}
+    .pos{position:absolute;translate:-50% -50%;display:grid;place-items:center;gap:4px}
+    .badge{font-size:10px;padding:2px 6px;border-radius:999px;background:#102f23;color:#b9ffe7;border:1px solid rgba(39,224,165,.35)}
+    .pos .avatar{width:60px;height:46px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,.2)}
+    .pos .label{font-size:11px;text-align:center}
+    .hint{font-size:12px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Toprak Gübre Su Halısaha – Takım Oluştur</h1>
+    <div class="pill">📡 Seçimler canlı • 🏷️ Firestore</div>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <h2>Seçili Oyuncular</h2>
+      <div class="content">
+        <div class="actions">
+          <label for="teamSize" class="hint">Takım boyutu:</label>
+          <select id="teamSize">
+            <option value="5">5'li</option>
+            <option value="6" selected>6'lı</option>
+            <option value="7">7'li</option>
+          </select>
+          <button class="cta" id="buildBtn">Takımı Hazırla</button>
+          <span id="status" class="hint"></span>
+        </div>
+        <div id="selectedList" class="list"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Yerleşim (Saha)</h2>
+      <div class="content">
+        <div class="field" id="field">
+          <div class="circle"></div>
+        </div>
+        <p class="hint" style="margin-top:10px">📝 Pozisyonlar otomatik yerleştirilir. Eksik varsa sırayla doldurulur.</p>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCWzY5xWn1WYPCfeaQb4xqmJIy5oJnaiHk",
+      authDomain: "tgshalisaha-1e266.firebaseapp.com",
+      projectId: "tgshalisaha-1e266",
+      storageBucket: "tgshalisaha-1e266.appspot.com",
+      messagingSenderId: "829282473937",
+      appId: "1:829282473937:web:bdf37a003cad53b763f2f0",
+      measurementId: "G-4898506T9Z"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const PLAYERS = [
+      {id:"tsubasa", name:"Tsubasa Ozora", img:"images/tsubasa.jpg"},
+      {id:"hyuga", name:"Kojiro Hyuga", img:"images/hyuga.jpg"},
+      {id:"misaki", name:"Taro Misaki", img:"images/misaki.jpg"},
+      {id:"wakabayashi", name:"Genzo Wakabayashi", img:"images/wakabayashi.jpg"},
+      {id:"wakashimazu", name:"Ken Wakashimazu", img:"images/wakashimazu.jpg"},
+      {id:"matsuyama", name:"Hikaru Matsuyama", img:"images/matsuyama.jpg"},
+      {id:"soda", name:"Makoto Soda", img:"images/soda.jpg"},
+      {id:"tachibana", name:"Kazuo Tachibana", img:"images/tachibana.jpg"},
+      {id:"takasugi", name:"Shingo Takasugi", img:"images/takasugi.jpg"},
+      {id:"ishizaki", name:"Ryo Ishizaki", img:"images/ishizaki.jpg"},
+      {id:"jun", name:"Jun Misugi", img:"images/jun.jpg"},
+      {id:"nitta", name:"Shun Nitta", img:"images/nitta.jpg"}
+    ];
+
+    const ROLES = {
+      wakabayashi: "GK", wakashimazu: "GK",
+      ishizaki: "DEF", takasugi: "DEF",
+      matsuyama: "MID", soda: "MID", misaki: "MID", jun: "MID",
+      tsubasa: "FWD", hyuga: "FWD", nitta: "FWD", tachibana: "FWD"
+    };
+
+    const TEMPLATES = {
+      5: [ {role:"GK",x:50,y:90}, {role:"DEF",x:30,y:65}, {role:"DEF",x:70,y:65}, {role:"MID",x:40,y:40}, {role:"FWD",x:60,y:25} ],
+      6: [ {role:"GK",x:50,y:90}, {role:"DEF",x:25,y:70}, {role:"DEF",x:75,y:70}, {role:"MID",x:35,y:48}, {role:"MID",x:65,y:48}, {role:"FWD",x:50,y:28} ],
+      7: [ {role:"GK",x:50,y:90}, {role:"DEF",x:20,y:70}, {role:"DEF",x:50,y:70}, {role:"DEF",x:80,y:70}, {role:"MID",x:35,y:48}, {role:"MID",x:65,y:48}, {role:"FWD",x:50,y:28} ]
+    };
+
+    const selList = document.getElementById("selectedList");
+    const statusSpan = document.getElementById("status");
+    const teamSizeSel = document.getElementById("teamSize");
+    const buildBtn = document.getElementById("buildBtn");
+    const field = document.getElementById("field");
+    let selected = [];
+
+    onSnapshot(collection(db, "tsubasa_picks"), (snap) => {
+      const map = {};
+      snap.forEach(d => { map[d.id] = d.data(); });
+      selected = PLAYERS.filter(p => map[p.id]?.picked)
+        .map(p => ({...p, pickedBy: map[p.id].pickedBy || ""}))
+        .sort((a,b)=>(a.ts||0)-(b.ts||0));
+      renderList();
+      statusSpan.textContent = selected.length ? `Seçili oyuncu: ${selected.length}` : "Henüz seçim yok";
+    });
+
+    function renderList(){
+      selList.innerHTML = selected.map(p => `
+        <div class="row">
+          <img src="${p.img}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/120x90?text=${encodeURIComponent(p.name)}'">
+          <div><div class="name">${p.name}</div><div class="pickedby">Seçen: ${p.pickedBy || "-"}</div></div>
+        </div>`).join("");
+    }
+
+    function chooseForRole(role, pool){
+      const i = pool.findIndex(p => (ROLES[p.id]||"")===role);
+      if(i>=0) return pool.splice(i,1)[0];
+      return pool.shift();
+    }
+
+    function buildTeam(){
+      const size = parseInt(teamSizeSel.value,10);
+      const tmpl = TEMPLATES[size];
+      if(!selected.length){ alert("Seçili oyuncu yok."); return; }
+      const pool = selected.slice(0,size);
+      const used=[];
+      tmpl.forEach(slot=>{
+        if(!pool.length) return;
+        const p = chooseForRole(slot.role,pool);
+        if(p) used.push({slot,p});
+      });
+      renderField(used);
+    }
+
+    function renderField(used){
+      field.querySelectorAll(".pos").forEach(el=>el.remove());
+      used.forEach(({slot,p})=>{
+        const el=document.createElement("div");
+        el.className="pos";
+        el.style.left=slot.x+"%"; el.style.top=slot.y+"%";
+        el.innerHTML=`
+          <span class="badge">${slot.role}</span>
+          <img class="avatar" src="${p.img}" onerror="this.src='https://via.placeholder.com/160x110?text=${encodeURIComponent(p.name)}'" alt="${p.name}">
+          <div class="label">${p.name}</div>`;
+        field.appendChild(el);
+      });
+    }
+
+    buildBtn.addEventListener("click",buildTeam);
+  </script>
+</body>
+</html>
