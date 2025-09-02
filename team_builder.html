@@ -50,7 +50,7 @@
       border:1px solid rgba(96,165,250,.25);
     }
 
-    main{max-width:1220px; margin:16px auto 100px; padding:0 16px;}
+    main{max-width:1220px; margin:16px auto 120px; padding:0 16px;}
     .grid{display:grid; gap:16px; grid-template-columns:1.2fr 1fr}
     @media (max-width:1080px){.grid{grid-template-columns:1fr}}
 
@@ -133,7 +133,18 @@
     .avatar{width:60px; height:46px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,.25)}
     .tag{font-size:10px; padding:2px 6px; border-radius:999px; background:rgba(0,0,0,.32); border:1px solid rgba(255,255,255,.18); color:#eafffb}
 
-    /* sticky bottom bar for mobile actions */
+    /* scoreboard */
+    .score{
+      display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+      padding:10px 12px; border-radius:12px; border:1px solid var(--line);
+      background:linear-gradient(180deg,var(--glass1),var(--glass2));
+      margin-top:10px;
+    }
+    .score .side{display:flex; align-items:center; gap:10px}
+    .score .goals{font-size:28px; font-weight:900; letter-spacing:.5px; min-width:28px; text-align:center}
+    .score button{min-width:36px}
+
+    /* sticky action bar */
     .dock{
       position:fixed; left:0; right:0; bottom:0; z-index:30;
       display:flex; gap:10px; padding:10px 12px; justify-content:center; flex-wrap:wrap;
@@ -155,8 +166,8 @@
     <div class="brand">
       <div class="logo">⚽</div>
       <div>
-        <h1>Toprak Gübre Su Halısaha – Takım & Maç Yönetimi</h1>
-        <div class="pill">🖐️ Sürükle-Bırak • ✍️ Rol & İstatistik • ☁️ Firestore</div>
+        <h1>TGS Halısaha – Takım ve İstatistikler</h1>
+        <div class="pill">🖐️ Sürükle-Bırak • ✍️ Rol & İstatistik</div>
       </div>
     </div>
   </header>
@@ -174,7 +185,7 @@
               <option value="7">7</option>
             </select>
           </label>
-          <button class="ghost" id="autoSplit" title="Sırayla A/B">Oto-böl A/B</button>
+        <button class="ghost" id="autoSplit" title="Sırayla A/B">Oto-böl A/B</button>
           <span id="status" class="pill">Seçim okunuyor…</span>
           <span id="matchMeta" class="pill">Match: …</span>
         </div>
@@ -198,7 +209,7 @@
 
     <!-- RIGHT -->
     <section class="card">
-      <h2>Saha Yerleşimi</h2>
+      <h2>Saha Yerleşimi & Skor</h2>
       <div class="content fieldwrap">
         <div class="split2">
           <div>
@@ -210,6 +221,24 @@
             <div class="field" id="fieldB"><div class="circle"></div></div>
           </div>
         </div>
+
+        <!-- SCOREBOARD -->
+        <div class="score">
+          <div class="side">
+            <b>Takım A</b>
+            <button id="aMinus">–</button>
+            <div class="goals" id="aGoals">0</div>
+            <button id="aPlus">+</button>
+          </div>
+          <div class="side">
+            <b>Takım B</b>
+            <button id="bMinus">–</button>
+            <div class="goals" id="bGoals">0</div>
+            <button id="bPlus">+</button>
+          </div>
+          <button class="cta" id="saveScore">Skoru Kaydet</button>
+        </div>
+
         <p class="pill" style="margin-top:8px">İpucu: Karttaki <b>Rol</b> seçimine göre yerleşim yapılır. Starter, Gol, Asist sahayı etkilemez; raporda kullanılır.</p>
       </div>
     </section>
@@ -281,6 +310,15 @@
     const statusSpan = document.getElementById("status");
     const toast = document.getElementById("toast");
 
+    // SCOREBOARD refs
+    const aMinus = document.getElementById("aMinus");
+    const aPlus  = document.getElementById("aPlus");
+    const bMinus = document.getElementById("bMinus");
+    const bPlus  = document.getElementById("bPlus");
+    const aGoalsEl = document.getElementById("aGoals");
+    const bGoalsEl = document.getElementById("bGoals");
+    const saveScoreBtn = document.getElementById("saveScore");
+
     /* Local state */
     const savedTeams = JSON.parse(localStorage.getItem("tg_teams") || "{}");
     const savedRoles = JSON.parse(localStorage.getItem("tg_roles") || "{}");
@@ -304,18 +342,55 @@
     function ensureMatchId(){
       if(!matchId){ matchId = "m_" + Date.now(); localStorage.setItem("tg_matchId", matchId); }
       matchMeta.textContent = `Match: ${matchId}`;
+      subscribeMatchScore(); // scoreboard sync
     }
     ensureMatchId();
 
     let selected = []; // [{id,name,img,pickedBy,ts}]
+    let scoreA = 0, scoreB = 0;
+    let unsubMatch = null;
 
-    /* Listen picks */
+    function subscribeMatchScore(){
+      if(unsubMatch) unsubMatch();
+      unsubMatch = onSnapshot(doc(db, "matches", matchId), (snap)=>{
+        const data = snap.data() || {};
+        scoreA = data.scoreA || 0;
+        scoreB = data.scoreB || 0;
+        updateScoreUI();
+      });
+    }
+
+    function updateScoreUI(){
+      aGoalsEl.textContent = scoreA;
+      bGoalsEl.textContent = scoreB;
+    }
+
+    aMinus.onclick = ()=>{ if(scoreA>0){ scoreA--; updateScoreUI(); } };
+    aPlus.onclick  = ()=>{ scoreA++; updateScoreUI(); };
+    bMinus.onclick = ()=>{ if(scoreB>0){ scoreB--; updateScoreUI(); } };
+    bPlus.onclick  = ()=>{ scoreB++; updateScoreUI(); };
+
+    async function saveScore(){
+      await setDoc(doc(db, "matches", matchId), { scoreA, scoreB, updatedAt: Date.now() }, { merge:true });
+      showToast("Skor kaydedildi ✅");
+    }
+    saveScoreBtn.addEventListener("click", saveScore);
+
+    /* Picks dinle — yoksa tüm oyuncuları göster */
     onSnapshot(collection(db, "tsubasa_picks"), (snap) => {
       const map = {}; snap.forEach(d => map[d.id] = d.data());
-      selected = PLAYERS.filter(p => map[p.id]?.picked)
+      const picked = PLAYERS.filter(p => map[p.id]?.picked)
         .map(p => ({...p, pickedBy: map[p.id].pickedBy || "", ts: map[p.id].ts || 0}))
         .sort((a,b)=>(a.ts||0)-(b.ts||0));
-      statusSpan.textContent = selected.length ? `Seçili oyuncu: ${selected.length}` : "Henüz seçim yok";
+
+      if (picked.length > 0) {
+        selected = picked;
+        statusSpan.textContent = `Seçili oyuncu: ${selected.length}`;
+      } else {
+        // Fallback: herkes görünsün
+        selected = PLAYERS.map(p => ({...p, pickedBy:""}));
+        statusSpan.textContent = "Henüz seçim yok — tüm oyuncular listelendi";
+      }
       renderLists();
     });
 
@@ -452,8 +527,7 @@
     }
     buildBtn.addEventListener("click", build);
 
-    /* Match ops */
-    let matchId = localStorage.getItem("tg_matchId") || "";
+    /* Yeni Maç */
     function resetStatsOnly(){
       localStorage.removeItem("tg_stats");
       Object.keys(savedStats).forEach(k=> delete savedStats[k]);
@@ -463,13 +537,15 @@
       localStorage.setItem("tg_matchId", matchId);
       resetStatsOnly();
       matchMeta.textContent = `Match: ${matchId}`;
+      scoreA = 0; scoreB = 0; updateScoreUI();
+      subscribeMatchScore();
       showToast("Yeni maç oluşturuldu 🆕");
     });
 
-    /* Save */
+    /* Kaydet (oyuncu istatistikleri) */
     async function saveToFirestore(){
       const teamSize = +teamSizeSel.value;
-      await setDoc(doc(db, "matches", matchId), { createdAt: Date.now(), teamSize }, {merge:true});
+      await setDoc(doc(db, "matches", matchId), { createdAt: Date.now(), teamSize, scoreA, scoreB }, {merge:true});
       const writes = selected.map(p=>{
         const st = statsOf(p.id);
         const data = { name:p.name, img:p.img, team:teamOf(p.id), role:roleOf(p.id), starter:!!st.starter, g:st.g||0, a:st.a||0 };
