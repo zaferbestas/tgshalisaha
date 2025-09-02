@@ -6,126 +6,230 @@
   <title>TGS Halısaha – Takım ve İstatistikler</title>
   <meta name="theme-color" content="#0b1530">
   <style>
-    :root{ --bg1:#0b1530; --bg2:#0e223f; --panel:#111c36; --panel-2:#0f1a31;
-      --accent:#27e0a5; --text:#e9f2ff; --muted:#a7bbd6; --line:#1f3557; }
+    :root{
+      --bg1:#0a1230; --bg2:#0d1e3f;
+      --glass1:rgba(13,24,52,.6); --glass2:rgba(16,30,64,.6);
+      --line:#1e335c; --muted:#9fb3d8; --text:#eaf2ff;
+      --accent:#27e0a5; --accent-2:#60a5fa; --warn:#ff5a5f;
+      --gk:#22d3ee; --def:#86efac; --mid:#fde68a; --fwd:#fca5a5;
+    }
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);
-      background: radial-gradient(1200px 500px at 50% -10%, rgba(28,64,112,.55), rgba(28,64,112,0) 60%),
-                  linear-gradient(180deg, var(--bg1), var(--bg2));}
-    header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:10px;justify-content:space-between;
-      padding:14px 16px;background:linear-gradient(180deg, rgba(6,14,33,.9), rgba(6,14,33,.75));
-      border-bottom:1px solid rgba(96,165,250,.18);backdrop-filter: blur(6px);}
-    h1{margin:0;font-size:clamp(18px,2.6vw,22px)}
-    .pill{display:inline-flex;gap:8px;align-items:center;border:1px solid rgba(96,165,250,.25);
-      background:linear-gradient(180deg,var(--panel),var(--panel-2));padding:8px 10px;border-radius:999px;font-size:12px;color:#cfe2ff;}
-    main{max-width:1200px;margin:16px auto 80px;padding:0 16px;}
-    .grid{display:grid;gap:16px;grid-template-columns:1.15fr 1fr}
-    @media (max-width:1050px){.grid{grid-template-columns:1fr}}
-    .card{background:linear-gradient(160deg,#0f1d3a 0%,#0b1530 100%);border:1px solid rgba(96,165,250,.15);
-      border-radius:14px;overflow:hidden;box-shadow:0 16px 32px rgba(0,0,0,.35);}
-    .card h2{margin:0;padding:14px 16px;border-bottom:1px solid var(--line);font-size:16px}
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--text);
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(1200px 600px at 60% -20%, rgba(55,120,220,.25), transparent 60%),
+        radial-gradient(900px 500px at 10% 110%, rgba(39,224,165,.12), transparent 60%),
+        linear-gradient(180deg,var(--bg1),var(--bg2));
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    }
+    header{
+      position:sticky; top:0; z-index:20;
+      display:flex; align-items:center; gap:12px; justify-content:space-between;
+      padding:12px 16px;
+      background:linear-gradient(180deg, rgba(6,14,33,.88), rgba(6,14,33,.68));
+      border-bottom:1px solid rgba(96,165,250,.18);
+      backdrop-filter: blur(8px);
+    }
+    .brand{display:flex; align-items:center; gap:12px}
+    .logo{
+      width:44px; height:44px; border-radius:50%;
+      display:grid; place-items:center; font-size:22px; color:#0b1530;
+      background:radial-gradient(circle at 35% 30%, #fff, #cde7ff);
+      box-shadow:0 12px 26px rgba(0,0,0,.35);
+      transform:rotate(-8deg);
+      animation:ball 3.3s ease-in-out infinite;
+    }
+    @keyframes ball{0%,100%{transform:translateY(0) rotate(-8deg)} 50%{transform:translateY(-4px) rotate(8deg)}}
+    h1{margin:0; font-size:clamp(18px,2.5vw,22px)}
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 12px; border-radius:999px; font-size:12px; color:#cfe2ff;
+      background:linear-gradient(180deg,var(--glass1),var(--glass2));
+      border:1px solid rgba(96,165,250,.25);
+    }
+
+    main{max-width:1220px; margin:16px auto 100px; padding:0 16px;}
+    .grid{display:grid; gap:16px; grid-template-columns:1.2fr 1fr}
+    @media (max-width:1080px){.grid{grid-template-columns:1fr}}
+
+    .card{
+      background:linear-gradient(160deg, rgba(18,30,64,.9), rgba(10,21,48,.9));
+      border:1px solid rgba(96,165,250,.15); border-radius:16px; overflow:hidden;
+      box-shadow:0 20px 40px rgba(0,0,0,.35);
+    }
+    .card h2{margin:0; padding:14px 16px; font-size:16px; border-bottom:1px solid var(--line)}
     .content{padding:14px 16px}
-    .actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:center}
+
+    .actions{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:12px}
     button, select, input[type="number"]{
-      padding:8px 10px;border-radius:10px;border:1px solid #274b6a;background:#0e2235;color:#cfe6ff;font-weight:600;cursor:pointer}
-    button.cta{background:var(--accent);color:#031a15;border:none;box-shadow:0 10px 22px rgba(39,224,165,.35)}
-    .small{font-size:12px;color:var(--muted)}
-    .split3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+      padding:10px 12px; border-radius:12px; border:1px solid #274b6a;
+      background:#0e2235; color:#cfe6ff; font-weight:700; letter-spacing:.2px; cursor:pointer;
+    }
+    button.cta{background:linear-gradient(180deg,var(--accent),#17c890); color:#062319; border:none; box-shadow:0 12px 26px rgba(39,224,165,.35)}
+    button.ghost{background:linear-gradient(180deg,var(--glass1),var(--glass2))}
+    button:active{transform:translateY(1px)}
+
+    /* 3 lists */
+    .split3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px}
     @media (max-width:900px){.split3{grid-template-columns:1fr}}
-    .list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-    .dropzone{min-height:140px;border:1px dashed #2b4c7a;border-radius:12px;padding:8px;display:grid;gap:8px;background:#0e203a}
-    .item{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:8px;border:1px solid var(--line);border-radius:10px;background:#0f2240}
-    .item.dragging{opacity:.6}
-    .thumb{width:52px;height:40px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
-    .rowtop{display:flex;align-items:center;gap:8px;justify-content:space-between}
-    .rowbot{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;align-items:center}
-    .num{width:64px}
-    .fieldwrap{display:grid;gap:14px}
-    .field{position:relative;aspect-ratio:2/3;border-radius:18px;background:linear-gradient(180deg,#0e2b17,#0a1c0f);
-      border:1px solid #2f5641;padding:10px}
-    .field::before,.field::after{content:"";position:absolute;left:50%;transform:translateX(-50%);border:2px solid rgba(255,255,255,.25);}
-    .field::before{top:8%;width:70%;height:26%;border-radius:12px}
-    .field::after{bottom:8%;width:70%;height:26%;border-radius:12px}
-    .circle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:26%;height:16%;border-radius:999px;border:2px solid rgba(255,255,255,.25)}
-    .field-title{display:flex;align-items:center;justify-content:space-between}
-    .pos{position:absolute;translate:-50% -50%;display:grid;place-items:center;gap:4px;text-align:center}
-    .badge{font-size:10px;padding:2px 6px;border-radius:999px;background:#102f23;color:#b9ffe7;border:1px solid rgba(39,224,165,.35)}
-    .avatar{width:60px;height:46px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,.2)}
-    .label{font-size:11px}
-    .split2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    @media (max-width:700px){.split2{grid-template-columns:1fr}}
+    .list-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px}
+    .badge{
+      display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:4px 8px; border-radius:999px;
+      background:linear-gradient(180deg,var(--glass1),var(--glass2)); border:1px solid rgba(96,165,250,.25); color:#cfe2ff;
+    }
+    .dropzone{
+      min-height:160px; border:1px dashed #2b4c7a; border-radius:14px; padding:10px;
+      display:grid; gap:10px; background:linear-gradient(180deg, rgba(10,26,56,.6), rgba(8,20,44,.6));
+    }
+    .dropzone.hover{outline:2px dashed #4fa3ff}
+
+    /* player card */
+    .item{
+      display:grid; grid-template-columns:24px auto 1fr; gap:10px; align-items:center;
+      padding:10px; border:1px solid var(--line); border-radius:12px;
+      background:linear-gradient(180deg, #0f2244, #0d1c3a);
+      box-shadow:0 10px 20px rgba(0,0,0,.25);
+      transition:transform .12s ease, box-shadow .12s ease;
+    }
+    .item:hover{transform:translateY(-2px); box-shadow:0 16px 32px rgba(0,0,0,.35)}
+    .handle{cursor:grab; opacity:.8; user-select:none}
+    .item.dragging{opacity:.65}
+    .thumb{width:56px; height:42px; object-fit:cover; border-radius:8px; border:1px solid var(--line)}
+    .meta{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+    .name{font-weight:800; letter-spacing:.2px}
+    .who{font-size:12px; color:var(--muted)}
+    .rowbot{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:6px}
+    .num{width:68px}
+
+    /* role pills */
+    .rolepill{
+      display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:800; letter-spacing:.3px; color:#082018;
+      border:1px solid rgba(255,255,255,.18);
+    }
+    .rp-gk { background:linear-gradient(180deg,var(--gk),#1ab4d0) }
+    .rp-def{ background:linear-gradient(180deg,var(--def),#5bd487) }
+    .rp-mid{ background:linear-gradient(180deg,var(--mid),#f5c84a) }
+    .rp-fwd{ background:linear-gradient(180deg,var(--fwd),#f87171) }
+
+    /* fields */
+    .fieldwrap{display:grid; gap:14px}
+    .split2{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+    @media (max-width:720px){.split2{grid-template-columns:1fr}}
+    .field-title{display:flex; align-items:center; justify-content:space-between}
+    .field{
+      position:relative; aspect-ratio:2/3; border-radius:18px;
+      background:
+        radial-gradient(400px 200px at 50% 20%, rgba(255,255,255,.06), transparent 60%),
+        linear-gradient(180deg,#0f2c18,#0b1f10);
+      border:1px solid #2b6b4a; padding:10px; overflow:hidden;
+    }
+    .field::before,.field::after{content:""; position:absolute; left:50%; transform:translateX(-50%); border:2px solid rgba(255,255,255,.28)}
+    .field::before{top:8%; width:70%; height:26%; border-radius:12px}
+    .field::after{bottom:8%; width:70%; height:26%; border-radius:12px}
+    .circle{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:26%; height:16%; border-radius:999px; border:2px solid rgba(255,255,255,.28)}
+    .pos{position:absolute; translate:-50% -50%; display:grid; place-items:center; gap:4px; text-align:center}
+    .avatar{width:60px; height:46px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,.25)}
+    .tag{font-size:10px; padding:2px 6px; border-radius:999px; background:rgba(0,0,0,.32); border:1px solid rgba(255,255,255,.18); color:#eafffb}
+
+    /* sticky bottom bar for mobile actions */
+    .dock{
+      position:fixed; left:0; right:0; bottom:0; z-index:30;
+      display:flex; gap:10px; padding:10px 12px; justify-content:center; flex-wrap:wrap;
+      background:linear-gradient(180deg, rgba(6,14,33,.75), rgba(6,14,33,.9));
+      border-top:1px solid rgba(96,165,250,.18); backdrop-filter: blur(6px);
+    }
+
+    /* toast */
+    .toast{
+      position:fixed; right:14px; bottom:74px; z-index:40;
+      background:#0d2a1f; color:#b9ffe7; border:1px solid rgba(39,224,165,.35);
+      border-radius:12px; padding:10px 12px; font-size:14px; box-shadow:0 12px 24px rgba(0,0,0,.35);
+      display:none;
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1>Toprak Gübre Su Halısaha – Takım & Maç Yönetimi</h1>
-    <div class="pill">🖐️ Sürükle-Bırak ile Manuel Takım • 📡 Seçimler canlı</div>
+    <div class="brand">
+      <div class="logo">⚽</div>
+      <div>
+        <h1>Toprak Gübre Su Halısaha – Takım & Maç Yönetimi</h1>
+        <div class="pill">🖐️ Sürükle-Bırak • ✍️ Rol & İstatistik • ☁️ Firestore</div>
+      </div>
+    </div>
   </header>
 
   <main class="grid">
-    <!-- LEFT: manual team building -->
+    <!-- LEFT -->
     <section class="card">
-      <h2>Kadro / Takım Kur (Manuel)</h2>
+      <h2>Kadro / Takım Kur</h2>
       <div class="content">
         <div class="actions">
-          <label class="small">Takım boyutu (her takım):</label>
-          <select id="teamSize">
-            <option value="5">5</option>
-            <option value="6" selected>6</option>
-            <option value="7">7</option>
-          </select>
-          <button id="autoSplit" title="Sırayla A/B">Oto-böl A/B</button>
-          <button class="cta" id="buildBtn">Sahaya Yerleştir</button>
-          <div style="flex:1"></div>
-          <button id="newMatch">Yeni Maç</button>
-          <button class="cta" id="saveStats">Kaydet</button>
-          <button id="exportCsv">CSV İndir</button>
+          <label class="pill">Takım boyutu
+            <select id="teamSize">
+              <option value="5">5</option>
+              <option value="6" selected>6</option>
+              <option value="7">7</option>
+            </select>
+          </label>
+          <button class="ghost" id="autoSplit" title="Sırayla A/B">Oto-böl A/B</button>
+          <span id="status" class="pill">Seçim okunuyor…</span>
+          <span id="matchMeta" class="pill">Match: …</span>
         </div>
 
-        <div class="small" id="matchMeta">Match: (oluşturuluyor…)</div>
-        <div class="small" id="status"></div>
-
-        <div class="split3" style="margin-top:10px">
+        <div class="split3" style="margin-top:8px">
           <div>
-            <div class="list-header"><b>Bench</b><span class="small" id="countBench"></span></div>
+            <div class="list-header"><b>Bench</b><span class="badge" id="countBench">0</span></div>
             <div class="dropzone" id="zone-bench" data-team="-"></div>
           </div>
           <div>
-            <div class="list-header"><b>Takım A</b><span class="small" id="countA"></span></div>
+            <div class="list-header"><b>Takım A</b><span class="badge" id="countA">0</span></div>
             <div class="dropzone" id="zone-A" data-team="A"></div>
           </div>
           <div>
-            <div class="list-header"><b>Takım B</b><span class="small" id="countB"></span></div>
+            <div class="list-header"><b>Takım B</b><span class="badge" id="countB">0</span></div>
             <div class="dropzone" id="zone-B" data-team="B"></div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- RIGHT: two fields -->
+    <!-- RIGHT -->
     <section class="card">
       <h2>Saha Yerleşimi</h2>
       <div class="content fieldwrap">
         <div class="split2">
           <div>
-            <div class="field-title"><b>Takım A</b><span class="small" id="hintA"></span></div>
+            <div class="field-title"><b>Takım A</b><span class="badge" id="hintA">0</span></div>
             <div class="field" id="fieldA"><div class="circle"></div></div>
           </div>
           <div>
-            <div class="field-title"><b>Takım B</b><span class="small" id="hintB"></span></div>
+            <div class="field-title"><b>Takım B</b><span class="badge" id="hintB">0</span></div>
             <div class="field" id="fieldB"><div class="circle"></div></div>
           </div>
         </div>
-        <p class="small">🎯 Oyuncuyu kartından **sürükleyip** listeler arasında taşı. Karttaki **Rol / Starter / Gol / Asist** alanları düzenlenebilir. “Kaydet” hepsini Firestore’a yazar.</p>
+        <p class="pill" style="margin-top:8px">İpucu: Karttaki <b>Rol</b> seçimine göre yerleşim yapılır. Starter, Gol, Asist sahayı etkilemez; raporda kullanılır.</p>
       </div>
     </section>
   </main>
+
+  <!-- Sticky action dock (mobile-friendly) -->
+  <div class="dock">
+    <button class="cta" id="buildBtn">Sahaya Yerleştir</button>
+    <button class="ghost" id="newMatch">Yeni Maç</button>
+    <button class="cta" id="saveStats">Kaydet</button>
+    <button class="ghost" id="exportCsv">CSV İndir</button>
+  </div>
+
+  <div id="toast" class="toast">Kaydedildi ✅</div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
     import { getFirestore, collection, onSnapshot, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-    // Firebase
+    /* Firebase */
     const firebaseConfig = {
       apiKey: "AIzaSyCWzY5xWn1WYPCfeaQb4xqmJIy5oJnaiHk",
       authDomain: "tgshalisaha-1e266.firebaseapp.com",
@@ -138,7 +242,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Players (14)
+    /* Oyuncular */
     const PLAYERS = [
       {id:"tsubasa", name:"Tsubasa Ozora", img:"images/tsubasa.jpg"},
       {id:"hyuga", name:"Kojiro Hyuga", img:"images/hyuga.jpg"},
@@ -156,7 +260,7 @@
       {id:"taki",   name:"Hajime Taki",     img:"images/taki.jpg"}
     ];
 
-    // Refs
+    /* Refs */
     const teamSizeSel = document.getElementById("teamSize");
     const autoSplitBtn = document.getElementById("autoSplit");
     const buildBtn = document.getElementById("buildBtn");
@@ -175,12 +279,12 @@
     const hintB = document.getElementById("hintB");
     const matchMeta = document.getElementById("matchMeta");
     const statusSpan = document.getElementById("status");
+    const toast = document.getElementById("toast");
 
-    // Local stores
-    const savedTeams = JSON.parse(localStorage.getItem("tg_teams") || "{}"); // {id: "A"|"B"|"-"}
-    const savedRoles = JSON.parse(localStorage.getItem("tg_roles") || "{}"); // {id: "GK"/"DEF"/"MID"/"FWD"}
-    const savedStats = JSON.parse(localStorage.getItem("tg_stats") || "{}"); // {id:{g,a,starter}}
-
+    /* Local state */
+    const savedTeams = JSON.parse(localStorage.getItem("tg_teams") || "{}");
+    const savedRoles = JSON.parse(localStorage.getItem("tg_roles") || "{}");
+    const savedStats = JSON.parse(localStorage.getItem("tg_stats") || "{}");
     function setTeamFor(id, t){ savedTeams[id]=t; localStorage.setItem("tg_teams", JSON.stringify(savedTeams)); }
     function teamOf(id){ return savedTeams[id] ?? "-"; }
     function setRoleFor(id, r){ savedRoles[id]=r; localStorage.setItem("tg_roles", JSON.stringify(savedRoles)); }
@@ -188,28 +292,26 @@
     function statsOf(id){ return savedStats[id] ?? {g:0,a:0,starter:false}; }
     function setStatsFor(id, s){ savedStats[id]=s; localStorage.setItem("tg_stats", JSON.stringify(savedStats)); }
 
-    // Saha şablonları
+    /* Field templates */
     const TEMPLATES = {
       5: [ {role:"GK",x:50,y:90},{role:"DEF",x:30,y:65},{role:"DEF",x:70,y:65},{role:"MID",x:40,y:40},{role:"FWD",x:60,y:25} ],
       6: [ {role:"GK",x:50,y:90},{role:"DEF",x:25,y:70},{role:"DEF",x:75,y:70},{role:"MID",x:35,y:48},{role:"MID",x:65,y:48},{role:"FWD",x:50,y:28} ],
       7: [ {role:"GK",x:50,y:90},{role:"DEF",x:20,y:70},{role:"DEF",x:50,y:70},{role:"DEF",x:80,y:70},{role:"MID",x:35,y:48},{role:"MID",x:65,y:48},{role:"FWD",x:50,y:28} ]
     };
 
-    // Match id
+    /* Match id */
     let matchId = localStorage.getItem("tg_matchId") || "";
     function ensureMatchId(){
       if(!matchId){ matchId = "m_" + Date.now(); localStorage.setItem("tg_matchId", matchId); }
-      matchMeta.textContent = `Match ID: ${matchId}`;
+      matchMeta.textContent = `Match: ${matchId}`;
     }
     ensureMatchId();
 
     let selected = []; // [{id,name,img,pickedBy,ts}]
 
-    // Picks feed
-    import { getDocs } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    /* Listen picks */
     onSnapshot(collection(db, "tsubasa_picks"), (snap) => {
-      const map = {};
-      snap.forEach(d => { map[d.id] = d.data(); });
+      const map = {}; snap.forEach(d => map[d.id] = d.data());
       selected = PLAYERS.filter(p => map[p.id]?.picked)
         .map(p => ({...p, pickedBy: map[p.id].pickedBy || "", ts: map[p.id].ts || 0}))
         .sort((a,b)=>(a.ts||0)-(b.ts||0));
@@ -217,50 +319,54 @@
       renderLists();
     });
 
-    // ----- Drag & Drop -----
+    /* Drag & Drop */
     let dragId = null;
     [zoneBench, zoneA, zoneB].forEach(zone=>{
-      zone.addEventListener("dragover", e=>{ e.preventDefault(); zone.style.outline="2px dashed #4fa3ff"; });
-      zone.addEventListener("dragleave", ()=> zone.style.outline="");
+      zone.addEventListener("dragover", e=>{ e.preventDefault(); zone.classList.add("hover"); });
+      zone.addEventListener("dragleave", ()=> zone.classList.remove("hover"));
       zone.addEventListener("drop", e=>{
-        e.preventDefault(); zone.style.outline="";
-        if(dragId){
-          const targetTeam = zone.dataset.team;
-          setTeamFor(dragId, targetTeam);
-          renderLists();
-          dragId = null;
-        }
+        e.preventDefault(); zone.classList.remove("hover");
+        if(dragId){ setTeamFor(dragId, zone.dataset.team); renderLists(); dragId = null; }
       });
     });
 
+    function rolePill(role){
+      const r = role || "MID";
+      const cls = r==="GK"?"rp-gk":r==="DEF"?"rp-def":r==="MID"?"rp-mid":"rp-fwd";
+      return `<span class="rolepill ${cls}">${r}</span>`;
+    }
+
     function itemHtml(p){
-      const team = teamOf(p.id);
+      const t = teamOf(p.id);
       const st = statsOf(p.id);
-      const role = roleOf(p.id);
+      const r = roleOf(p.id);
       return `
         <div class="item" draggable="true" data-id="${p.id}">
+          <div class="handle">⠿</div>
           <img class="thumb" src="${p.img}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/120x90?text=${encodeURIComponent(p.name)}'">
           <div>
-            <div class="rowtop">
-              <div><b>${p.name}</b> <span class="small">(${p.pickedBy || "-"})</span></div>
-              <div class="small">Takım: <b>${team==="-"?"Bench":team}</b></div>
+            <div class="meta">
+              <span class="name">${p.name}</span>
+              <span class="who">Seçen: ${p.pickedBy || "-"}</span>
+              ${rolePill(r)}
+              <span class="badge">Takım: <b>${t==="-"?"Bench":t}</b></span>
             </div>
             <div class="rowbot">
-              <label class="small">Rol</label>
+              <label class="who">Rol</label>
               <select data-ctl="role">
-                <option value="GK"  ${role==="GK"?"selected":""}>GK</option>
-                <option value="DEF" ${role==="DEF"?"selected":""}>DEF</option>
-                <option value="MID" ${role==="MID"?"selected":""}>MID</option>
-                <option value="FWD" ${role==="FWD"?"selected":""}>FWD</option>
+                <option value="GK"  ${r==="GK"?"selected":""}>GK</option>
+                <option value="DEF" ${r==="DEF"?"selected":""}>DEF</option>
+                <option value="MID" ${r==="MID"?"selected":""}>MID</option>
+                <option value="FWD" ${r==="FWD"?"selected":""}>FWD</option>
               </select>
 
-              <label class="small">Starter</label>
+              <label class="who">Starter</label>
               <input data-ctl="starter" type="checkbox" ${st.starter?"checked":""} />
 
-              <label class="small">Gol</label>
+              <label class="who">Gol</label>
               <input data-ctl="g" class="num" type="number" min="0" max="30" value="${st.g||0}"/>
 
-              <label class="small">Asist</label>
+              <label class="who">Asist</label>
               <input data-ctl="a" class="num" type="number" min="0" max="30" value="${st.a||0}"/>
             </div>
           </div>
@@ -271,25 +377,20 @@
     function attachItemEvents(container){
       container.querySelectorAll(".item").forEach(el=>{
         const id = el.dataset.id;
-        // drag
         el.addEventListener("dragstart", ()=>{ dragId = id; el.classList.add("dragging"); });
-        el.addEventListener("dragend", ()=>{ el.classList.remove("dragging"); });
-
-        // controls
+        el.addEventListener("dragend", ()=> el.classList.remove("dragging"));
         const roleSel = el.querySelector('[data-ctl="role"]');
         const chk = el.querySelector('[data-ctl="starter"]');
         const g = el.querySelector('[data-ctl="g"]');
         const a = el.querySelector('[data-ctl="a"]');
-
-        roleSel.addEventListener("change", e=> setRoleFor(id, e.target.value));
-        chk.addEventListener("change", e=> setStatsFor(id, {...statsOf(id), starter: e.target.checked}));
+        roleSel.addEventListener("change", e=>{ setRoleFor(id, e.target.value); renderLists(); });
+        chk.addEventListener("change", e=> setStatsFor(id, {...statsOf(id), starter:e.target.checked}));
         g.addEventListener("change", e=> setStatsFor(id, {...statsOf(id), g:+e.target.value||0}));
         a.addEventListener("change", e=> setStatsFor(id, {...statsOf(id), a:+e.target.value||0}));
       });
     }
 
     function renderLists(){
-      // ensure team defaults are '-'
       selected.forEach(p=>{ if(savedTeams[p.id]===undefined) setTeamFor(p.id, "-"); });
       const bench = selected.filter(p=>teamOf(p.id)==="-");
       const teamA = selected.filter(p=>teamOf(p.id)==="A");
@@ -303,40 +404,40 @@
       attachItemEvents(zoneA);
       attachItemEvents(zoneB);
 
-      countBench.textContent = `${bench.length} oyuncu`;
-      countA.textContent = `${teamA.length} oyuncu`;
-      countB.textContent = `${teamB.length} oyuncu`;
+      countBench.textContent = bench.length;
+      countA.textContent = teamA.length;
+      countB.textContent = teamB.length;
+      hintA.textContent = teamA.length;
+      hintB.textContent = teamB.length;
     }
 
-    // Auto-split (optional)
+    /* Auto split */
     autoSplitBtn.addEventListener("click", ()=>{
       let toggle = true;
-      selected.forEach(p=>{
-        setTeamFor(p.id, toggle ? "A" : "B");
-        toggle = !toggle;
-      });
+      selected.forEach(p=>{ setTeamFor(p.id, toggle?"A":"B"); toggle=!toggle; });
       renderLists();
     });
 
-    // Saha çizimi
+    /* Draw fields */
     function renderField(fieldEl, teamPlayers, teamSize){
       fieldEl.querySelectorAll(".pos").forEach(el=>el.remove());
       const tmpl = TEMPLATES[teamSize];
-      const pool = teamPlayers.slice(0, teamSize); // cap
+      const pool = teamPlayers.slice(0, teamSize);
       tmpl.forEach(slot=>{
         if(!pool.length) return;
-        // role eşleşmesini dene
         let idx = pool.findIndex(p => roleOf(p.id)===slot.role);
         if(idx < 0) idx = 0;
         const p = pool.splice(idx,1)[0];
-        const el=document.createElement("div");
-        el.className="pos";
-        el.style.left=slot.x+"%"; el.style.top=slot.y+"%";
-        el.innerHTML = `
-          <span class="badge">${slot.role}</span>
+        const node = document.createElement("div");
+        node.className = "pos";
+        node.style.left = slot.x+"%"; node.style.top = slot.y+"%";
+        const role = roleOf(p.id);
+        const tagClass = role==="GK"?"rp-gk":role==="DEF"?"rp-def":role==="MID"?"rp-mid":"rp-fwd";
+        node.innerHTML = `
+          <span class="tag ${tagClass}">${slot.role}</span>
           <img class="avatar" src="${p.img}" onerror="this.src='https://via.placeholder.com/160x110?text=${encodeURIComponent(p.name)}'">
           <div class="label">${p.name}</div>`;
-        fieldEl.appendChild(el);
+        fieldEl.appendChild(node);
       });
     }
 
@@ -344,43 +445,43 @@
       const size = +teamSizeSel.value;
       const teamA = selected.filter(p=>teamOf(p.id)==="A");
       const teamB = selected.filter(p=>teamOf(p.id)==="B");
-      hintA.textContent = `${teamA.length} oyuncu`;
-      hintB.textContent = `${teamB.length} oyuncu`;
+      hintA.textContent = teamA.length; hintB.textContent = teamB.length;
       renderField(fieldA, teamA, size);
       renderField(fieldB, teamB, size);
+      showToast("Sahaya yerleştirildi ⚽");
     }
     buildBtn.addEventListener("click", build);
 
-    // Yeni Maç
+    /* Match ops */
+    let matchId = localStorage.getItem("tg_matchId") || "";
+    function resetStatsOnly(){
+      localStorage.removeItem("tg_stats");
+      Object.keys(savedStats).forEach(k=> delete savedStats[k]);
+    }
     newMatchBtn.addEventListener("click", ()=>{
       matchId = "m_" + Date.now();
       localStorage.setItem("tg_matchId", matchId);
-      // sadece istatistikleri sıfırla (takım/rol kalsın istersen)
-      localStorage.removeItem("tg_stats");
-      Object.keys(savedStats).forEach(k=> delete savedStats[k]);
-      matchMeta.textContent = `Match ID: ${matchId}`;
-      alert("Yeni maç oluşturuldu.");
+      resetStatsOnly();
+      matchMeta.textContent = `Match: ${matchId}`;
+      showToast("Yeni maç oluşturuldu 🆕");
     });
 
-    // Kaydet → Firestore
-    saveStatsBtn.addEventListener("click", async ()=>{
+    /* Save */
+    async function saveToFirestore(){
       const teamSize = +teamSizeSel.value;
       await setDoc(doc(db, "matches", matchId), { createdAt: Date.now(), teamSize }, {merge:true});
-      // her oyuncu
       const writes = selected.map(p=>{
-        const data = {
-          name: p.name, img: p.img,
-          team: teamOf(p.id),
-          role: roleOf(p.id),
-          ...statsOf(p.id)
-        };
+        const st = statsOf(p.id);
+        const data = { name:p.name, img:p.img, team:teamOf(p.id), role:roleOf(p.id), starter:!!st.starter, g:st.g||0, a:st.a||0 };
         return setDoc(doc(db, "matches", matchId, "players", p.id), data, {merge:true});
       });
       await Promise.all(writes);
-      alert("Kaydedildi ✅");
+    }
+    saveStatsBtn.addEventListener("click", async ()=>{
+      try{ await saveToFirestore(); showToast("Kaydedildi ✅"); }catch{ showToast("Kaydedilemedi ⚠️"); }
     });
 
-    // CSV
+    /* CSV */
     function toCsv(rows){
       const headers = ["playerId","name","team","role","starter","goals","assists"];
       const lines = [headers.join(",")];
@@ -396,7 +497,16 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a"); a.href=url; a.download=`match_${matchId||"current"}.csv`;
       document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      showToast("CSV indirildi ⬇️");
     });
+
+    /* toast */
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.style.display = "block";
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(()=> toast.style.display="none", 1600);
+    }
   </script>
 </body>
 </html>
