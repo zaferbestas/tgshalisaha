@@ -160,20 +160,25 @@
     const db = getFirestore(app);
 
     // 12 karakter
-    const PLAYERS = [
-      {id:"tsubasa", name:"Tsubasa Ozora", kit:"10", img:"images/tsubasa.jpg"},
-      {id:"hyuga", name:"Kojiro Hyuga", kit:"9", img:"images/hyuga.jpg"},
-      {id:"misaki", name:"Taro Misaki", kit:"11", img:"images/misaki.jpg"},
-      {id:"wakabayashi", name:"Genzo Wakabayashi", kit:"1", img:"images/wakabayashi.jpg"},
-      {id:"wakashimazu", name:"Ken Wakashimazu", kit:"1", img:"images/wakashimazu.jpg"},
-      {id:"matsuyama", name:"Hikaru Matsuyama", kit:"7", img:"images/matsuyama.jpg"},
-      {id:"soda", name:"Makoto Soda", kit:"6", img:"images/soda.jpg"},
-      {id:"tachibana", name:"Kazuo Tachibana", kit:"8", img:"images/tachibana.jpg"},
-      {id:"takasugi", name:"Shingo Takasugi", kit:"5", img:"images/takasugi.jpg"},
-      {id:"ishizaki", name:"Ryo Ishizaki", kit:"4", img:"images/ishizaki.jpg"},
-      {id:"jun", name:"Jun Misugi", kit:"14", img:"images/jun.jpg"},
-      {id:"nitta", name:"Shun Nitta", kit:"13", img:"images/nitta.jpg"}
-    ];
+// 14 karakter
+  const PLAYERS = [
+    {id:"tsubasa",      name:"Tsubasa Ozora",     kit:"10", img:"images/tsubasa.jpg"},
+    {id:"hyuga",        name:"Kojiro Hyuga",      kit:"9",  img:"images/hyuga.jpg"},
+    {id:"misaki",       name:"Taro Misaki",       kit:"11", img:"images/misaki.jpg"},
+    {id:"wakabayashi",  name:"Genzo Wakabayashi", kit:"1",  img:"images/wakabayashi.jpg"},
+    {id:"wakashimazu",  name:"Ken Wakashimazu",   kit:"1",  img:"images/wakashimazu.jpg"},
+    {id:"matsuyama",    name:"Hikaru Matsuyama",  kit:"7",  img:"images/matsuyama.jpg"},
+    {id:"soda",         name:"Makoto Soda",       kit:"6",  img:"images/soda.jpg"},
+    {id:"tachibana",    name:"Kazuo Tachibana",   kit:"8",  img:"images/tachibana.jpg"},
+    {id:"takasugi",     name:"Shingo Takasugi",   kit:"5",  img:"images/takasugi.jpg"},
+    {id:"ishizaki",     name:"Ryo Ishizaki",      kit:"4",  img:"images/ishizaki.jpg"},
+    {id:"jun",          name:"Jun Misugi",        kit:"14", img:"images/jun.jpg"},
+    {id:"nitta",        name:"Shun Nitta",        kit:"13", img:"images/nitta.jpg"},
+    // 👇 Yeni eklenenler
+    {id:"kisugi",       name:"Seiichiro Kisugi",  kit:"15", img:"images/kisugi.jpg"},
+    {id:"taki",         name:"Hajime Taki",       kit:"16", img:"images/taki.jpg"}
+  ];
+
 
     const grid = document.getElementById("grid");
     const toast = document.getElementById("toast");
